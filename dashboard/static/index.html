@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>时空记忆 · 告警看板</title>
+<style>
+  :root{--bg:#0f1420;--panel:#171e2e;--panel2:#1e2739;--line:#2a3550;--txt:#dbe3f4;--muted:#8b97b3;--accent:#4da3ff;--red:#ff5c6c;--orange:#ffb020;--green:#37c98a;--purple:#a98bff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#141b2b,#0f1420)}
+  h1{font-size:18px;margin:0;letter-spacing:.5px}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;box-shadow:0 0 8px var(--green)}
+  .sub{color:var(--muted);font-size:12px}
+  main{padding:20px 24px;max-width:1400px;margin:0 auto}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card .k{color:var(--muted);font-size:12px}
+  .card .v{font-size:28px;font-weight:700;margin-top:4px}
+  .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-bottom:18px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .panel h2{font-size:14px;margin:0 0 12px;color:var(--muted);font-weight:600}
+  .bars{display:flex;flex-direction:column;gap:8px}
+  .barrow{display:grid;grid-template-columns:110px 1fr 44px;gap:10px;align-items:center;font-size:12px}
+  .track{background:var(--panel2);height:10px;border-radius:6px;overflow:hidden}
+  .fill{height:100%;background:linear-gradient(90deg,#2f6bd6,#4da3ff);border-radius:6px}
+  .fill.red{background:linear-gradient(90deg,#b8323f,#ff5c6c)}
+  .fill.orange{background:linear-gradient(90deg,#b5760f,#ffb020)}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  select,button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px}
+  button{cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px}
+  .lv-high{background:rgba(255,92,108,.18);color:var(--red)}
+  .lv-medium{background:rgba(255,176,32,.18);color:var(--orange)}
+  .lv-low{background:rgba(55,201,138,.18);color:var(--green)}
+  .st-active{background:rgba(77,163,255,.18);color:var(--accent)}
+  .st-handled{background:rgba(55,201,138,.18);color:var(--green)}
+  .st-ignored{background:rgba(139,151,179,.18);color:var(--muted)}
+  a{color:var(--accent);text-decoration:none}
+  .muted{color:var(--muted)}
+  .empty{padding:30px;text-align:center;color:var(--muted)}
+  .scroll{max-height:520px;overflow:auto}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>时空记忆 · 告警看板</h1>
+    <div class="sub"><span class="dot"></span>实时监测中 · 只分析行为，不识别身份</div>
+  </div>
+  <div class="sub" id="updated">--</div>
+</header>
+<main>
+  <div class="panel" style="margin-bottom:18px">
+    <h2>实时画面（带检测框）· YOLO11n <span class="muted" id="live-meta"></span>
+      <a href="/api/live.jpg" target="_blank" style="float:right">原图</a>
+    </h2>
+    <div style="background:#000;border-radius:10px;overflow:hidden">
+      <img id="live" alt="实时画面" style="display:block;width:100%">
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="k">告警总数</div><div class="v" id="c-total">-</div></div>
+    <div class="card"><div class="k">待处理</div><div class="v" id="c-active" style="color:var(--red)">-</div></div>
+    <div class="card"><div class="k">已处理</div><div class="v" id="c-handled" style="color:var(--green)">-</div></div>
+    <div class="card"><div class="k">类型数</div><div class="v" id="c-types">-</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>按类型分布</h2>
+      <div class="bars" id="bytype"></div>
+    </div>
+    <div class="panel">
+      <h2>按等级分布 / 近 24h</h2>
+      <div class="bars" id="bylevel"></div>
+      <div class="bars" id="timeline" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>告警列表</h2>
+    <div class="controls">
+      <select id="f-type"><option value="">全部类型</option></select>
+      <select id="f-status">
+        <option value="">全部状态</option>
+        <option value="active">待处理</option>
+        <option value="handled">已处理</option>
+        <option value="ignored">已忽略</option>
+      </select>
+      <button id="btn-refresh">刷新</button>
+      <span class="muted" id="count"></span>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>时间</th><th>摄像头</th><th>类型</th><th>详情</th><th>等级</th><th>状态</th><th>快照</th><th>操作</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="8" class="empty">加载中…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => (s==null?"":String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let typeFilter = "";
+
+function bars(el, items, cls){
+  const max = Math.max(1, ...items.map(x=>x.count||0));
+  el.innerHTML = items.map(x=>{
+    const name = x.event_name || x.event_type || x.alert_level || x.t || "-";
+    const c = x.count||0;
+    return `<div class="barrow"><span class="muted">${esc(name)}</span>
+      <div class="track"><div class="fill ${cls||''}" style="width:${Math.round(c/max*100)}%"></div></div>
+      <span>${c}</span></div>`;
+  }).join("") || '<div class="muted">暂无数据</div>';
+}
+
+async function loadStats(){
+  const r = await fetch('/api/stats'); const d = await r.json();
+  $('#c-total').textContent = d.total;
+  $('#c-active').textContent = d.active;
+  $('#c-handled').textContent = d.handled;
+  $('#c-types').textContent = d.by_type.length;
+  bars($('#bytype'), d.by_type);
+  bars($('#bylevel'), d.by_level, 'orange');
+  bars($('#timeline'), (d.timeline||[]).map(x=>({t:(x.h||'').slice(11,16), count:x.count})), 'red');
+  const sel = $('#f-type'); const cur = sel.value;
+  sel.innerHTML = '<option value="">全部类型</option>' + d.by_type.map(x=>`<option value="${esc(x.event_type)}">${esc(x.event_name||x.event_type)} (${x.count})</option>`).join('');
+  sel.value = cur;
+}
+
+async function loadAlarms(){
+  const q = new URLSearchParams();
+  if(typeFilter) q.set('event_type', typeFilter);
+  const st = $('#f-status').value; if(st) q.set('status', st);
+  q.set('limit','200');
+  const r = await fetch('/api/alarms?'+q.toString()); const d = await r.json();
+  $('#count').textContent = `共 ${d.total} 条`;
+  if(!d.items.length){ $('#rows').innerHTML = '<tr><td colspan="8" class="empty">暂无告警</td></tr>'; return; }
+  $('#rows').innerHTML = d.items.map(a=>{
+    const lv = a.alert_level||'medium';
+    const stCls = a.status==='handled'?'st-handled':(a.status==='ignored'?'st-ignored':'st-active');
+    const stTxt = a.status==='handled'?'已处理':(a.status==='ignored'?'已忽略':'待处理');
+    const snapUrl = a.snapshot ? a.snapshot.replace('127.0.0.1', location.hostname) : '';
+    const snap = snapUrl ? `<a href="${esc(snapUrl)}" target="_blank">查看</a>` : '<span class="muted">-</span>';
+    const op = a.status==='active' ? `<button onclick="handle(${a.id},'handled')">处理</button>` : `<span class="muted">-</span>`;
+    return `<tr>
+      <td class="muted">${esc(a.time||a.create_time)}</td>
+      <td>${esc(a.camera_name||a.camera_id)}</td>
+      <td><b>${esc(a.event_name||a.event_type)}</b></td>
+      <td>${esc(a.details)}</td>
+      <td><span class="tag lv-${lv}">${esc(lv)}</span></td>
+      <td><span class="tag ${stCls}">${stTxt}</span></td>
+      <td>${snap}</td>
+      <td>${op}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function handle(id, status){
+  await fetch('/api/alarms/'+id, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status})});
+  loadStats(); loadAlarms();
+}
+
+function tick(){ const t=new Date().toLocaleTimeString(); $('#updated').textContent='更新于 '+t; }
+async function refresh(){ try{ await loadStats(); await loadAlarms(); tick(); }catch(e){ console.error(e); } }
+
+$('#f-type').addEventListener('change', e=>{ typeFilter=e.target.value; loadAlarms(); });
+$('#f-status').addEventListener('change', loadAlarms);
+$('#btn-refresh').addEventListener('click', refresh);
+refresh(); setInterval(refresh, 5000);
+
+const _live = document.getElementById('live');
+if (_live) _live.src = '/api/live.mjpg';
+const _lm = document.getElementById('live-meta');
+if (_lm) _lm.textContent = 'MJPEG 实时流';
+</script>
+</body>
+</html>

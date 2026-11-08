@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.venv-*/
+venv/
+*-venv/
+env/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Runtime logs / state
+*.log
+bridge/*.json
+memory/*.json
+frigate/config/*.db
+frigate/config/*.db-*
+frigate/config/backup_config.yaml
+frigate/config/.jwt_secret
+frigate/config/go2rtc_homekit.yml
+frigate/config/model_cache/
+dashboard/snapshots/
+archive/*.log
+
+# Media / datasets / model weights
+frigate/media/*.mp4
+frigate/media/*.webm
+frigate/media/frigate/
+eval/urfd/
+eval/loitering/
+netdisk/
+bridge/models/
+yolo/*.pt
+*.onnx
+*.engine
+
+# Large docs
+*.docx
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# DB files
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db

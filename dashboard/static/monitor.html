@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>统一监控首页 · 时空记忆智能体</title>
+<style>
+  :root{--bg:#0b101a;--panel:#141b2b;--panel2:#1c2537;--line:#2a3550;--txt:#dbe3f4;--muted:#8b97b3;--accent:#4da3ff;--red:#ff5c6c;--orange:#ffb020;--green:#37c98a;--purple:#a98bff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#121a2a,#0b101a)}
+  h1{font-size:17px;margin:0;letter-spacing:.5px}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;box-shadow:0 0 8px var(--green)}
+  .sub{color:var(--muted);font-size:12px}
+  .links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px 22px 0;max-width:1600px;margin:0 auto}
+  .link{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--txt);text-decoration:none;transition:.15s}
+  .link:hover{border-color:var(--accent);background:var(--panel2)}
+  .link .t{font-weight:600}
+  .link .d{color:var(--muted);font-size:12px}
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px 22px 0;max-width:1600px;margin:0 auto}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .stat .k{color:var(--muted);font-size:12px}
+  .stat .v{font-size:22px;font-weight:700}
+  main{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;padding:14px 22px;max-width:1600px;margin:0 auto}
+  @media(max-width:1000px){main{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.links{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .panel h2{font-size:14px;margin:0 0 10px;color:var(--muted);font-weight:600;display:flex;justify-content:space-between}
+  .liveimg{width:100%;display:block;border-radius:10px;background:#000}
+  .stream{max-height:calc(100vh - 300px);overflow:auto;display:flex;flex-direction:column;gap:8px}
+  .item{background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:9px 11px;transition:.3s}
+  .item.high{border-left-color:var(--red)}
+  .item.medium{border-left-color:var(--orange)}
+  .item.new{animation:flash 1.4s ease-out}
+  @keyframes flash{0%{background:#2a3a5c}100%{background:var(--panel2)}}
+  .row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+  .row1 b{font-size:13px}
+  .time{color:var(--muted);font-size:12px}
+  .row2{font-size:12.5px;color:#c6d0e6}
+  .row3{display:flex;justify-content:space-between;margin-top:4px;font-size:12px;color:var(--muted)}
+  a{color:var(--accent);text-decoration:none}
+  .muted{color:var(--muted)}
+  .empty{padding:30px;text-align:center;color:var(--muted)}
+  .pulse{width:8px;height:8px;background:var(--red);border-radius:50%;display:inline-block;animation:p 1.2s infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>统一监控首页 · 时空记忆智能体</h1>
+    <div class="sub"><span class="pulse"></span> 实时监测 · 只分析行为，不识别身份</div>
+  </div>
+  <div class="sub" id="clock">--</div>
+</header>
+
+<div class="links">
+  <a class="link" id="lnk-frigate" target="_blank">
+    <span><span class="t">Frigate 实时监控</span><br><span class="d">原始画面 / 事件 / RTSP</span></span><span>↗</span>
+  </a>
+  <a class="link" href="/alarms">
+    <span><span class="t">告警看板（详情）</span><br><span class="d">统计 / 筛选 / 处理 / 快照</span></span><span>→</span>
+  </a>
+  <a class="link" id="lnk-ruoyi" target="_blank">
+    <span><span class="t">RuoYi 管理后台</span><br><span class="d">系统管理 / 告警管理</span></span><span>↗</span>
+  </a>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="k">告警总数</div><div class="v" id="s-total">-</div></div>
+  <div class="stat"><div class="k">待处理</div><div class="v" id="s-active" style="color:var(--red)">-</div></div>
+  <div class="stat"><div class="k">反复徘徊</div><div class="v" id="s-pacing" style="color:var(--orange)">-</div></div>
+  <div class="stat"><div class="k">异常逗留</div><div class="v" id="s-dwell" style="color:var(--purple)">-</div></div>
+  <div class="stat"><div class="k">人群聚集</div><div class="v" id="s-crowd" style="color:var(--accent)">-</div></div>
+  <div class="stat"><div class="k">共现</div><div class="v" id="s-cooccur" style="color:var(--green)">-</div></div>
+</div>
+
+<main>
+  <section class="panel">
+    <h2><span>实时画面（带检测框）· YOLO11n</span><span class="muted" id="live-meta"></span></h2>
+    <img class="liveimg" id="live" alt="实时画面">
+  </section>
+
+  <section class="panel">
+    <h2><span>实时告警流</span><a href="/alarms">全部 →</a></h2>
+    <div class="stream" id="stream"><div class="empty">加载中…</div></div>
+  </section>
+</main>
+
+<script>
+const host = location.hostname;
+document.getElementById('lnk-frigate').href = `http://${host}:5000`;
+document.getElementById('lnk-ruoyi').href = `http://${host}:8081`;
+
+const esc = s => (s==null?"":String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function tickClock(){ document.getElementById('clock').textContent = new Date().toLocaleString(); }
+tickClock(); setInterval(tickClock, 1000);
+
+// 实时画面（服务端画框）
+const _live = document.getElementById('live');
+if (_live) _live.src = '/api/live.mjpg';
+const _lm = document.getElementById('live-meta');
+if (_lm) _lm.textContent = 'MJPEG 实时流';
+
+// 统计
+async function loadStats(){
+  try{
+    const d = await (await fetch('/api/stats')).json();
+    document.getElementById('s-total').textContent = d.total;
+    document.getElementById('s-active').textContent = d.active;
+    const m = {}; (d.by_type||[]).forEach(x=>m[x.event_type]=x.count);
+    document.getElementById('s-pacing').textContent = m.pacing||0;
+    document.getElementById('s-dwell').textContent = m.abnormal_dwell||0;
+    document.getElementById('s-crowd').textContent = m.crowd||0;
+    document.getElementById('s-cooccur').textContent = m.cooccur||0;
+  }catch(e){}
+}
+
+// 告警流
+let lastMaxId = null;
+async function loadStream(){
+  try{
+    const d = await (await fetch('/api/alarms?limit=30')).json();
+    const box = document.getElementById('stream');
+    if(!d.items.length){ box.innerHTML = '<div class="empty">暂无告警</div>'; return; }
+    const maxId = Math.max(...d.items.map(a=>a.id));
+    const isFirst = lastMaxId === null;
+    box.innerHTML = d.items.map(a=>{
+      const lv = a.alert_level||'medium';
+      const isNew = !isFirst && a.id > lastMaxId;
+      const snap = a.snapshot ? a.snapshot.replace('127.0.0.1', host) : '';
+      const t = (a.time||a.create_time||'').toString().slice(-8);
+      const name = a.event_name || a.event_type || '告警';
+      return `<div class="item ${lv} ${isNew?'new':''}">
+        <div class="row1"><b>${esc(name)}</b><span class="time">${esc(t)}</span></div>
+        <div class="row2">${esc(a.details)}</div>
+        <div class="row3"><span>${esc(a.camera_name||a.camera_id)} · ${esc(lv)}</span>
+          ${snap?`<a href="${esc(snap)}" target="_blank">快照</a>`:''}</div>
+      </div>`;
+    }).join('');
+    lastMaxId = maxId;
+  }catch(e){}
+}
+
+loadStats(); loadStream();
+setInterval(loadStats, 5000);
+setInterval(loadStream, 3000);
+</script>
+</body>
+</html>

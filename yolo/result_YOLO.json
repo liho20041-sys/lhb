@@ -1,0 +1,21 @@
+{
+  "model": "YOLO",
+  "frigate_version": "0.18.2-cfa08c5",
+  "window_s": 120,
+  "detector_inference_ms": 42.84,
+  "camera_fps": 2.0,
+  "detection_fps": 3.6,
+  "total_events": 16,
+  "person_events": 16,
+  "labels": {
+    "person": 16
+  },
+  "person_score_mean": 0.8905,
+  "person_score_p50": 0.9019,
+  "person_score_p90": 0.9184,
+  "person_score_min": 0.827,
+  "box_area_p50": 0.0836,
+  "small_objects(area<1%)": 0,
+  "large_objects(area>5%)": 12,
+  "box_area_max": 0.1435
+}

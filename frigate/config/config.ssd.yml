@@ -1,0 +1,39 @@
+mqtt:
+  enabled: false
+
+auth:
+  enabled: false
+
+detect:
+  enabled: true
+
+detectors:
+  cpu1:
+    type: cpu
+
+cameras:
+  demo:
+    ffmpeg:
+      hwaccel_args: preset-nvidia-h264
+      inputs:
+        - path: /media/avenue.mp4
+          input_args: -re -stream_loop -1
+    detect:
+      enabled: true
+      width: 640
+      height: 360
+      fps: 10
+    objects:
+      track:
+        - person
+        - bicycle
+        - car
+    snapshots:
+      enabled: true
+      bounding_box: true
+      timestamp: true
+      retain:
+        default: 3
+    record:
+      enabled: false
+version: 0.18-0

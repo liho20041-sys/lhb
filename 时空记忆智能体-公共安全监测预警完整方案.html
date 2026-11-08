@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>时空记忆智能体 · 完整方案</title>
+<style>
+  :root{
+    --ink:#111827; --mid:#6b7280; --soft:#9ca3af;
+    --line:#e5e7eb; --bg:#f9fafb; --card:#fff;
+    --per:#0e9f6e; --per-bg:#ecfdf5;
+    --und:#7e3af2; --und-bg:#f5f3ff;
+    --act:#c27803; --act-bg:#fffbeb;
+    --st:#334155; --st-bg:#f1f5f9;
+    --mem:#0f766e; --mem-bg:#f0fdfa;
+    --pathA:#0284c7; --pathA-bg:#f0f9ff;
+    --pathB:#7e3af2; --pathB-bg:#f5f3ff;
+    --a:#0369a1; --a-bg:#e0f2fe;
+    --b:#be123c; --b-bg:#fce7f3;
+    --c:#b45309; --c-bg:#fef3c7;
+    --d:#0f766e; --d-bg:#f0fdfa;
+    --e:#6d28d9; --e-bg:#f5f3ff;
+    --step1:#0e9f6e;
+    --step2:#b45309;
+    --step3:#6d28d9;
+    --warn:#be123c; --warn-bg:#fff1f2;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:15.5px; line-height:1.8; -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:1100px; margin:0 auto; padding:52px 32px 80px;
+    background:var(--card); box-shadow:0 1px 3px rgba(17,24,39,.05);
+  }
+  header.head{border-bottom:2px solid var(--ink); padding-bottom:20px; margin-bottom:28px;}
+  header.head .kicker{font-size:12px; letter-spacing:2.5px; color:var(--soft); text-transform:uppercase; margin-bottom:10px;}
+  header.head h1{font-size:27px; line-height:1.4; margin:0 0 10px; font-weight:700; letter-spacing:.5px;}
+  header.head p{margin:0; color:var(--mid); font-size:14.5px;}
+
+  /* 目录 */
+  nav.toc{
+    margin:0 0 36px; padding:20px 24px; background:#f7f9fc;
+    border:1px solid var(--line); border-radius:8px;
+  }
+  nav.toc h2{margin:0 0 12px; font-size:14px; letter-spacing:1.5px; color:var(--mid); font-weight:600;}
+  nav.toc ol{margin:0; padding-left:20px; columns:2; column-gap:36px; font-size:14px; line-height:1.85;}
+  nav.toc li{margin-bottom:6px; break-inside:avoid;}
+  nav.toc a{color:var(--ink); text-decoration:none; border-bottom:1px dotted transparent;}
+  nav.toc a:hover{color:var(--per); border-bottom-color:var(--per);}
+  nav.toc .sub{color:var(--mid); font-size:12.5px; margin-left:4px;}
+
+  .brief{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:32px;}
+  .brief-card{border:1px solid var(--line); border-radius:9px; padding:16px 18px; background:#fff;}
+  .brief-card .tag{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:1.5px;
+    padding:2px 9px; border-radius:3px; margin-bottom:8px;
+  }
+  .brief-card.bg-card .tag{background:#f3f4f6; color:#374151;}
+  .brief-card.goal-card .tag{background:var(--ink); color:#fff;}
+  .brief-card p{margin:0; font-size:14px; line-height:1.75; color:#374151;}
+  .brief-card p b{color:var(--ink); font-weight:700;}
+  .brief-card .hl{background:linear-gradient(transparent 62%, #fde68a 62%); padding:0 2px;}
+
+  .thesis{
+    margin:0 0 36px; padding:20px 24px; background:var(--st-bg);
+    border-left:4px solid var(--st); border-radius:0 6px 6px 0;
+    font-size:16.5px; line-height:1.9;
+  }
+  .thesis .big{font-size:19px; font-weight:700; color:var(--st); display:block; margin-bottom:6px;}
+  .thesis b{font-weight:700;}
+
+  h2.section{
+    font-size:21px; margin:54px 0 16px; padding-bottom:10px;
+    border-bottom:2px solid var(--line); font-weight:700; letter-spacing:.3px;
+  }
+  h2.section .idx{color:var(--soft); font-weight:400; margin-right:10px; font-size:16px;}
+  h2.section .lead{display:block; font-size:13.5px; color:var(--mid); font-weight:400; margin-top:4px;}
+
+  h3.sub{font-size:17px; margin:32px 0 12px; font-weight:700; color:var(--ink);}
+  h3.sub::before{content:""; display:inline-block; width:4px; height:15px; background:var(--ink); margin-right:9px; vertical-align:-2px; border-radius:1px;}
+
+  h4.mini{font-size:14.5px; margin:22px 0 8px; font-weight:700; color:#374151;}
+
+  /* 过渡段落 */
+  .transition{
+    margin:16px 0 24px; padding:14px 18px; background:#f7f9fc;
+    border-left:3px solid var(--soft); border-radius:0 6px 6px 0;
+    font-size:13.5px; line-height:1.8; color:#4b5563;
+  }
+  .transition b{color:var(--ink);}
+  .transition .next{display:block; margin-top:6px; font-size:12.5px; color:var(--soft);}
+
+  figure{margin:22px 0; padding:24px 20px 16px; background:#fff; border:1px solid var(--line); border-radius:10px;}
+  figure svg{display:block; width:100%; height:auto;}
+  figure figcaption{margin-top:14px; font-size:12.5px; color:var(--mid); text-align:center; line-height:1.6;}
+  figure figcaption b{color:var(--ink);}
+
+  .fig-tag{
+    display:inline-block; margin:0 0 12px; padding:3px 11px;
+    background:var(--ink); color:#fff; font-size:11.5px; font-weight:600;
+    border-radius:3px; letter-spacing:1px;
+  }
+
+  .note-box{
+    margin:18px 0; padding:14px 18px; background:var(--bg); border-left:3px solid var(--ink);
+    border-radius:0 6px 6px 0; font-size:13.5px; line-height:1.8;
+  }
+  .note-box b{color:var(--ink);}
+
+  /* 三层卡片 */
+  .layer-cards{display:flex; flex-direction:column; gap:14px; margin:20px 0 10px;}
+  .layer-card{
+    border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;
+    display:grid; grid-template-columns:120px 1fr;
+  }
+  .layer-card .lc-side{
+    padding:16px 12px; color:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; text-align:center;
+  }
+  .layer-card .lc-side .lc-name{font-size:16px; font-weight:700; line-height:1.3;}
+  .layer-card .lc-side .lc-sub{font-size:11px; opacity:.9; line-height:1.4;}
+  .layer-card.per .lc-side{background:var(--per);}
+  .layer-card.und .lc-side{background:var(--und);}
+  .layer-card.act .lc-side{background:var(--act);}
+  .layer-card .lc-body{padding:14px 18px; display:grid; grid-template-columns:78px 1fr; gap:6px 12px; font-size:13.2px; line-height:1.7;}
+  .layer-card .lc-body .k{color:var(--soft); font-size:11.5px; font-weight:600; padding-top:2px;}
+  .layer-card .lc-body .v{color:var(--ink);}
+  .layer-card .lc-body .v b{font-weight:700;}
+
+  .three-sub{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:6px;}
+  .three-sub .ts-item{
+    background:#fcfcfd; border:1px solid var(--line); border-radius:6px; padding:7px 10px;
+    font-size:11.8px; line-height:1.6;
+  }
+  .three-sub .ts-item b{display:block; font-size:12px; margin-bottom:2px;}
+  .three-sub .ts-item.t1 b{color:var(--und);}
+  .three-sub .ts-item.t2 b{color:var(--mem);}
+  .three-sub .ts-item.t3 b{color:#7c3aed;}
+
+  /* 记忆基座 */
+  .mem-box{
+    margin:20px 0; padding:16px 20px; background:var(--mem-bg); border:1px solid #99f6e4;
+    border-radius:10px; font-size:13.5px; line-height:1.8;
+  }
+  .mem-box b{color:var(--mem);}
+  .mem-box .mem-title{font-size:15px; font-weight:700; color:var(--mem); margin-bottom:6px; display:block;}
+  .mem-fields{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:10px;}
+  .mem-field{
+    background:#fff; border:1px solid #ccfbf1; border-radius:5px;
+    padding:6px 9px; font-size:11.5px; line-height:1.5;
+  }
+  .mem-field b{display:block; color:var(--mem); font-size:11.5px; margin-bottom:1px;}
+
+  /* 路径卡片 */
+  .path-block{
+    margin:24px 0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;
+  }
+  .path-head{
+    padding:16px 22px; color:#fff; display:flex; align-items:center; gap:14px;
+  }
+  .path-head .path-badge{
+    flex:0 0 auto; width:52px; height:52px; line-height:1.1; border-radius:10px;
+    background:rgba(255,255,255,.2); text-align:center; font-weight:700; padding-top:6px;
+  }
+  .path-head .path-badge small{display:block; font-size:10px; font-weight:400; opacity:.9;}
+  .path-head .path-title{font-size:17px; font-weight:700; line-height:1.3;}
+  .path-head .path-title small{display:block; font-weight:400; font-size:12px; opacity:.9; margin-top:2px;}
+  .path-head .path-tag{margin-left:auto; font-size:12px; padding:4px 12px; border-radius:20px; background:rgba(255,255,255,.22); font-weight:700; white-space:nowrap;}
+  .path-card-a .path-head{background:var(--pathA);}
+  .path-card-b .path-head{background:var(--pathB);}
+  .path-body{padding:18px 22px 20px;}
+  .path-body > p{margin:0 0 12px; font-size:14px; line-height:1.8; color:#374151;}
+  .path-body > p b{color:var(--ink);}
+
+  .steps{display:flex; flex-direction:column; gap:12px; margin:14px 0 4px;}
+  .step{
+    border:1px solid var(--line); border-radius:8px; background:#fcfcfd;
+    padding:14px 16px;
+  }
+  .step-head-row{display:grid; grid-template-columns:32px 1fr; gap:12px; align-items:start;}
+  .step .sno{
+    width:28px; height:28px; line-height:28px; border-radius:50%; text-align:center;
+    font-size:12.5px; font-weight:700; color:#fff;
+  }
+  .path-card-a .step .sno{background:var(--pathA);}
+  .path-card-b .step .sno{background:var(--pathB);}
+  .step .stitle{font-size:14.5px; font-weight:700; margin-bottom:4px; color:var(--ink);}
+  .step .stitle .layer-tag{
+    display:inline-block; font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:3px;
+    margin-right:6px; vertical-align:1px; letter-spacing:.5px;
+  }
+  .layer-per{background:var(--per-bg); color:var(--per);}
+  .layer-mem{background:var(--mem-bg); color:var(--mem);}
+  .layer-und{background:var(--und-bg); color:var(--und);}
+  .layer-act{background:var(--act-bg); color:var(--act);}
+  .layer-deploy{background:#f1f5f9; color:#475569;}
+  .step .sdesc{font-size:13px; color:#374151; line-height:1.75;}
+  .step .sdesc b{color:var(--ink); font-weight:700;}
+  .step .data-block{
+    margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+    margin-left:44px; font-size:12.8px; line-height:1.7; color:#374151;
+  }
+  .step .data-block .dl{font-size:11.5px; font-weight:700; color:var(--soft); letter-spacing:.5px; margin-bottom:4px;}
+  .step .data-block b{color:var(--ink);}
+  .step .data-block .data-ref{font-size:11.5px; color:var(--mid); margin-top:3px;}
+
+  .d-tag{
+    display:inline-block; padding:1px 8px; border-radius:20px; font-size:11.5px;
+    font-weight:700; white-space:nowrap; margin:1px 2px;
+  }
+  .d-pub{background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;}
+  .d-real{background:#fce7f3; color:#9d174d; border:1px solid #fbcfe8;}
+
+  /* 表格 */
+  .table-wrap{overflow-x:auto; margin:16px 0 10px;}
+  table{width:100%; border-collapse:collapse; font-size:13.3px; line-height:1.62;}
+  thead th{background:var(--bg); text-align:left; font-weight:700; padding:10px 12px; border:1px solid var(--line); white-space:nowrap; font-size:12.6px;}
+  tbody td{padding:9px 12px; border:1px solid var(--line); vertical-align:top;}
+  tbody tr:nth-child(even){background:#fcfcfd;}
+  tbody td code{
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11.5px;
+    background:#eef2f7; padding:1px 5px; border-radius:3px;
+  }
+
+  /* 五类数据概览 */
+  .data-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:18px 0 10px;}
+  .data-card{
+    border:1px solid var(--line); border-radius:9px; overflow:hidden; background:#fff;
+    display:flex; flex-direction:column;
+  }
+  .data-card .dc-head{
+    padding:8px 10px; font-size:12.5px; font-weight:700; color:#fff; text-align:center;
+  }
+  .data-card.da .dc-head{background:var(--a);}
+  .data-card.db .dc-head{background:var(--b);}
+  .data-card.dc .dc-head{background:var(--c);}
+  .data-card.dd .dc-head{background:var(--d);}
+  .data-card.de .dc-head{background:var(--e);}
+  .data-card .dc-body{padding:9px 11px 11px; font-size:12px; line-height:1.6; flex:1; color:#374151;}
+  .data-card .dc-body b{color:var(--ink); display:block; margin-bottom:3px; font-size:12.5px;}
+  .data-card .dc-foot{
+    padding:6px 11px; font-size:11px; border-top:1px dashed var(--line);
+    background:#fcfcfd; color:var(--mid);
+  }
+  .data-card .dc-foot b{color:var(--ink);}
+
+  /* 逐类数据 */
+  .plan-block{
+    margin:20px 0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;
+  }
+  .plan-head{
+    padding:13px 20px; color:#fff; display:flex; align-items:center; gap:12px;
+  }
+  .plan-head .pno{
+    flex:0 0 auto; width:32px; height:32px; line-height:32px; border-radius:50%;
+    background:rgba(255,255,255,.22); font-weight:700; font-size:13px; text-align:center;
+  }
+  .plan-head .ptitle{font-size:15px; font-weight:700; line-height:1.3;}
+  .plan-head .ptitle small{display:block; font-weight:400; font-size:11.5px; opacity:.9;}
+  .plan-head .pbadge{margin-left:auto; font-size:11.5px; padding:3px 10px; border-radius:20px; background:rgba(255,255,255,.22); font-weight:700; white-space:nowrap;}
+  .plan-card-a .plan-head{background:var(--a);}
+  .plan-card-b .plan-head{background:var(--b);}
+  .plan-card-c .plan-head{background:var(--c);}
+  .plan-card-d .plan-head{background:var(--d);}
+  .plan-card-e .plan-head{background:var(--e);}
+  .plan-body{padding:14px 20px 16px;}
+  .plan-grid{display:grid; grid-template-columns:92px 1fr; gap:7px 14px; font-size:13.2px; line-height:1.7;}
+  .plan-grid .k{color:var(--soft); font-size:11.8px; font-weight:600; padding-top:2px;}
+  .plan-grid .v{color:var(--ink);}
+  .plan-grid .v b{font-weight:700;}
+
+  .ref-box{
+    margin-top:12px; padding:12px 16px; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;
+    font-size:12.6px; line-height:1.7;
+  }
+  .ref-box .ref-title{font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; letter-spacing:.5px;}
+  .ref-box .ref-item{margin-bottom:5px;}
+  .ref-box .ref-item:last-child{margin-bottom:0;}
+  .ref-box .ref-item b{color:var(--ink);}
+  .ref-box code{
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11.5px;
+    background:#eef2f7; padding:1px 5px; border-radius:3px;
+  }
+
+  .role-main{display:inline-block; padding:1px 7px; border-radius:4px; font-size:11.5px; font-weight:700; background:#fce7f3; color:#9d174d;}
+  .role-aux{display:inline-block; padding:1px 7px; border-radius:4px; font-size:11.5px; font-weight:700; background:#e0f2fe; color:#0369a1;}
+  .role-cal{display:inline-block; padding:1px 7px; border-radius:4px; font-size:11.5px; font-weight:700; background:#fef3c7; color:#92400e;}
+
+  /* 演进卡片 */
+  .evo-block{
+    margin:24px 0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;
+  }
+  .evo-head{
+    padding:16px 22px; color:#fff; display:flex; align-items:center; gap:14px;
+  }
+  .evo-head .evo-badge{
+    flex:0 0 auto; width:56px; height:56px; line-height:1.1; border-radius:10px;
+    background:rgba(255,255,255,.2); text-align:center; font-weight:700; padding-top:8px;
+  }
+  .evo-head .evo-badge small{display:block; font-size:10px; font-weight:400; opacity:.9; margin-top:2px;}
+  .evo-head .evo-title{font-size:17px; font-weight:700; line-height:1.3;}
+  .evo-head .evo-title small{display:block; font-weight:400; font-size:12px; opacity:.9; margin-top:2px;}
+  .evo-head .evo-tag{margin-left:auto; font-size:12px; padding:4px 12px; border-radius:20px; background:rgba(255,255,255,.22); font-weight:700; white-space:nowrap;}
+  .evo-card-1 .evo-head{background:var(--step1);}
+  .evo-card-2 .evo-head{background:var(--step2);}
+  .evo-card-3 .evo-head{background:var(--step3);}
+  .evo-body{padding:16px 22px 18px;}
+  .evo-body > p{margin:0 0 12px; font-size:13.8px; line-height:1.8; color:#374151;}
+  .evo-body > p b{color:var(--ink);}
+
+  .impacts{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0 10px;}
+  .impact{
+    background:#fcfcfd; border:1px solid var(--line); border-radius:6px; padding:9px 11px;
+    font-size:12.3px; line-height:1.6;
+  }
+  .impact b{display:block; font-size:11.5px; margin-bottom:2px;}
+  .impact.i-per b{color:var(--per);}
+  .impact.i-und b{color:var(--und);}
+  .impact.i-act b{color:var(--act);}
+
+  .mem-extend{
+    margin-top:10px; padding:9px 12px; background:var(--mem-bg); border-radius:6px;
+    font-size:12.5px; color:#374151; line-height:1.7;
+  }
+  .mem-extend b{color:var(--mem);}
+
+  .boundary{
+    margin-top:10px; padding:9px 12px; background:#fffbeb; border-left:3px solid #f0b95a;
+    border-radius:0 5px 5px 0; font-size:12.3px; color:#5c4611; line-height:1.7;
+  }
+  .boundary b{color:#7a5a12;}
+
+  /* 范围声明 */
+  .scope-warning{
+    margin:20px 0 28px; padding:16px 20px; background:var(--warn-bg);
+    border:1px solid #fecaca; border-left:4px solid var(--warn);
+    border-radius:0 6px 6px 0; font-size:13.5px; line-height:1.8; color:#374151;
+  }
+  .scope-warning b{color:var(--warn); display:block; margin-bottom:4px; font-size:14.5px;}
+
+  /* 拍板清单 */
+  .decision-block{
+    margin:20px 0; border:2px solid var(--ink); border-radius:10px; overflow:hidden; background:#fff;
+  }
+  .decision-head{
+    padding:13px 20px; background:var(--ink); color:#fff;
+    font-size:15px; font-weight:700;
+  }
+  .decision-head small{display:block; font-weight:400; font-size:11.5px; opacity:.85; margin-top:2px;}
+  .decision-body{padding:4px 0;}
+  .decision-row{
+    display:grid; grid-template-columns:30px 1fr 180px; gap:12px; align-items:start;
+    padding:10px 20px; border-bottom:1px solid var(--line); font-size:13px; line-height:1.65;
+  }
+  .decision-row:last-child{border-bottom:none;}
+  .decision-row .dno{
+    width:22px; height:22px; line-height:22px; border-radius:50%; background:var(--st-bg);
+    text-align:center; font-size:11px; font-weight:700; color:var(--st); flex:0 0 auto;
+  }
+  .decision-row .ddesc b{color:var(--ink);}
+  .decision-row .ddesc small{display:block; color:var(--mid); font-size:11.5px; margin-top:2px;}
+  .decision-row .dblank{
+    border:1px dashed #cbd5e1; border-radius:5px; min-height:34px; background:#fcfcfd;
+    font-size:11px; color:var(--soft); padding:7px 10px; line-height:1.5;
+  }
+  @media (max-width:760px){
+    .decision-row{grid-template-columns:30px 1fr;}
+    .decision-row .dblank{grid-column:1 / -1; margin-top:4px;}
+  }
+
+  .closing{
+    margin:44px 0 0; padding:22px 26px; background:var(--st); color:#fff; border-radius:10px;
+    font-size:15.5px; line-height:1.85;
+  }
+  .closing b{color:#fde68a; font-weight:700;}
+  .closing .sig{display:block; margin-top:10px; font-size:12.5px; color:#cbd5e1;}
+
+  footer{margin-top:32px; padding-top:16px; border-top:1px solid var(--line); font-size:12px; color:var(--soft); text-align:center;}
+
+  @media (max-width:900px){
+    .brief{grid-template-columns:1fr;}
+    .data-grid{grid-template-columns:repeat(2,1fr);}
+    .plan-grid{grid-template-columns:1fr;}
+    .impacts{grid-template-columns:1fr;}
+    .three-sub{grid-template-columns:1fr;}
+    .mem-fields{grid-template-columns:repeat(2,1fr);}
+    .layer-card{grid-template-columns:1fr;}
+  }
+  @media (max-width:760px){
+    .page{padding:30px 16px 56px;}
+    header.head h1{font-size:21px;}
+    .thesis{font-size:15px; padding:16px 18px;}
+    .thesis .big{font-size:16.5px;}
+    .data-grid{grid-template-columns:1fr;}
+    .step .data-block{margin-left:0;}
+    nav.toc ol{columns:1;}
+  }
+  @media print{
+    body{background:#fff; font-size:11pt;}
+    .page{max-width:none; box-shadow:none; padding:0;}
+    figure,.path-block,table,.closing,.brief-card,.step,.data-card,.note-box,.plan-block,.evo-block,.decision-block{break-inside:avoid; page-break-inside:avoid;}
+    h2.section{break-after:avoid; page-break-after:avoid;}
+    h3.sub{break-after:avoid; page-break-after:avoid;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="head">
+    <div class="kicker">完整方案 · 时空记忆智能体</div>
+    <h1>时空记忆智能体：公共安全监测预警完整方案</h1>
+    <p>摄像头是眼睛，时空记忆库是大脑；三层处理 + 一个基座；三步演进：单模态 → 多模态 → 社会关系</p>
+  </header>
+
+  <!-- 目录 -->
+  <nav class="toc">
+    <h2>目录</h2>
+    <ol>
+      <li><a href="#s1">是什么：三层处理 + 一个基座</a><span class="sub">系统长什么样</span></li>
+      <li><a href="#s2">读什么：时空中的六种线</a><span class="sub">分析对象</span></li>
+      <li><a href="#s3">怎么建：两条实施路径</a><span class="sub">路径 A 与路径 B</span></li>
+      <li><a href="#s4">用什么建：五类数据规划</a><span class="sub">数据方案与参考数据集</span></li>
+      <li><a href="#s5">往哪走：三步演进路线</a><span class="sub">后续方向</span></li>
+      <li><a href="#s6">怎么验收：分层验收口径</a><span class="sub">正例稀缺下的评估</span></li>
+      <li><a href="#s7">需要需求方拍板的事项</a><span class="sub">启动前确认清单</span></li>
+    </ol>
+  </nav>
+
+  <!-- 背景与目标 -->
+  <div class="brief">
+    <div class="brief-card bg-card">
+      <span class="tag">背景</span>
+      <p>基层公共安全风险形态已从<b>显性、集中</b>转向<b>隐性、个体化、碎片化、苗头化</b>；存量摄像头全域覆盖，但普遍缺“理解”能力；高密度聚集与动态流动交织、遮挡复杂的公共空间（如农贸市场）是<b>代表性场景</b>。</p>
+    </div>
+    <div class="brief-card goal-card">
+      <span class="tag">目标</span>
+      <p>面向存量摄像头研制低成本智能视觉传感组件，形成<span class="hl"><b>“事前预警—事中干预—事后回溯”</b></span>闭环；<b>只分析行为，不识别身份</b>，可标准化交付与复制。</p>
+    </div>
+  </div>
+
+  <div class="thesis">
+    <span class="big">这份文档回答六个问题：是什么、读什么、怎么建、用什么建、往哪走、怎么验收。</span>
+    六个问题对应六个章节，每章之间有过渡——<b>先讲清系统长什么样，再讲分析对象是什么，然后讲两条实施路径、五类数据规划、三步演进方向，最后落到验收口径和需要需求方拍板的事项。</b>读完这一份，读者应能建立对项目的完整认知，并知道当前该做什么、后续往哪走、需要谁配合什么。
+  </div>
+
+  <!-- ============ 一、是什么 ============ -->
+  <h2 class="section" id="s1"><span class="idx">一、</span>是什么：三层处理 + 一个基座<span class="lead">系统由哪几层组成，每层做什么、产出什么、验收什么</span></h2>
+
+  <p style="font-size:14px; color:#374151; line-height:1.8; margin:0 0 8px;">
+    这个智能体不是“一个模型”，而是一个有眼睛、有大脑的完整系统——<b>摄像头是眼睛，时空记忆库是大脑</b>。主链只有三步：<b>感知（建线）→ 理解（读线）→ 决策（用线）</b>；<b>记忆库横贯底部，是支撑三步的基座</b>——感知向下写入，理解向上读取，决策向下查询。
+  </p>
+
+  <figure>
+    <span class="fig-tag">图 1 · 三层处理 + 一个基座</span>
+    <svg viewBox="0 0 1040 500" role="img" aria-label="时空记忆智能体：感知、理解、决策横向三步，记忆库横贯底部基座">
+      <defs>
+        <marker id="f1-in" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L9,3.5 L0,7 z" fill="#0284c7"/>
+        </marker>
+        <marker id="f1-per" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L9,3.5 L0,7 z" fill="#0e9f6e"/>
+        </marker>
+        <marker id="f1-und" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L9,3.5 L0,7 z" fill="#7e3af2"/>
+        </marker>
+        <marker id="f1-act" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L9,3.5 L0,7 z" fill="#c27803"/>
+        </marker>
+        <marker id="f1-out" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L9,3.5 L0,7 z" fill="#be123c"/>
+        </marker>
+        <marker id="f1-mem" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L9,3.5 L0,7 z" fill="#0f766e"/>
+        </marker>
+      </defs>
+
+      <rect x="0" y="0" width="1040" height="500" fill="#fff"/>
+
+      <text x="90" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#0284c7" letter-spacing="2">输入</text>
+      <line x1="20" y1="32" x2="160" y2="32" stroke="#0284c7" stroke-width="1.2"/>
+      <text x="470" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#111827" letter-spacing="2">主链 · 感知 → 理解 → 决策</text>
+      <line x1="185" y1="32" x2="770" y2="32" stroke="#111827" stroke-width="1.2"/>
+      <text x="880" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#be123c" letter-spacing="2">输出</text>
+      <line x1="800" y1="32" x2="1000" y2="32" stroke="#be123c" stroke-width="1.2"/>
+
+      <rect x="20" y="95" width="130" height="44" rx="8" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.5"/>
+      <text x="85" y="113" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0284c7">视频流</text>
+      <text x="85" y="128" text-anchor="middle" font-size="9" fill="#6b7280">全量巡检</text>
+
+      <rect x="20" y="180" width="130" height="44" rx="8" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.5"/>
+      <text x="85" y="198" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0284c7">人工查询</text>
+      <text x="85" y="213" text-anchor="middle" font-size="9" fill="#6b7280">图像 / 文本</text>
+
+      <line x1="150" y1="117" x2="178" y2="140" stroke="#0284c7" stroke-width="1.4" marker-end="url(#f1-in)"/>
+      <line x1="150" y1="202" x2="178" y2="180" stroke="#0284c7" stroke-width="1.4" marker-end="url(#f1-in)"/>
+
+      <rect x="182" y="115" width="100" height="92" rx="9" fill="#ecfdf5" stroke="#0e9f6e" stroke-width="1.7"/>
+      <text x="232" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="#0e9f6e">感知</text>
+      <text x="232" y="154" text-anchor="middle" font-size="9.5" fill="#059669">建线</text>
+      <text x="232" y="170" text-anchor="middle" font-size="9" fill="#6b7280">找点、连线</text>
+      <text x="232" y="185" text-anchor="middle" font-size="9" fill="#6b7280">人在哪 · 同一人</text>
+      <text x="232" y="200" text-anchor="middle" font-size="9" fill="#9ca3af">验收：稳</text>
+
+      <line x1="282" y1="161" x2="308" y2="161" stroke="#0e9f6e" stroke-width="1.6" marker-end="url(#f1-per)"/>
+
+      <rect x="310" y="72" width="210" height="178" rx="9" fill="#f5f3ff" stroke="#7e3af2" stroke-width="1.7"/>
+      <text x="415" y="94" text-anchor="middle" font-size="13" font-weight="700" fill="#7e3af2">理解</text>
+      <text x="415" y="109" text-anchor="middle" font-size="9.5" fill="#6d28d9">读线 · 三级判断 · 验收：准</text>
+      <rect x="322" y="118" width="186" height="36" rx="5" fill="#fff" stroke="#ddd6fe" stroke-width="1"/>
+      <text x="415" y="134" text-anchor="middle" font-size="10" fill="#6d28d9" font-weight="600">① 识形态 · 规则</text>
+      <text x="415" y="148" text-anchor="middle" font-size="8.5" fill="#6b7280">已知的苗头谱系</text>
+      <rect x="322" y="160" width="186" height="36" rx="5" fill="#fff" stroke="#99f6e4" stroke-width="1"/>
+      <text x="415" y="176" text-anchor="middle" font-size="10" fill="#0f766e" font-weight="600">② 辨偏离 · 正常基线</text>
+      <text x="415" y="190" text-anchor="middle" font-size="8.5" fill="#6b7280">未知的偏离候选</text>
+      <rect x="322" y="202" width="186" height="36" rx="5" fill="#fff" stroke="#c4b5fd" stroke-width="1"/>
+      <text x="415" y="218" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="600">③ 释归因 · 语义翻译</text>
+      <text x="415" y="232" text-anchor="middle" font-size="8.5" fill="#6b7280">让偏离变得可理解</text>
+
+      <line x1="520" y1="161" x2="546" y2="161" stroke="#7e3af2" stroke-width="1.6" marker-end="url(#f1-und)"/>
+
+      <rect x="548" y="115" width="100" height="92" rx="9" fill="#fffbeb" stroke="#c27803" stroke-width="1.7"/>
+      <text x="598" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="#c27803">决策</text>
+      <text x="598" y="154" text-anchor="middle" font-size="9.5" fill="#b45309">用线</text>
+      <text x="598" y="170" text-anchor="middle" font-size="9" fill="#6b7280">该不该管 · 怎么管</text>
+      <text x="598" y="185" text-anchor="middle" font-size="9" fill="#6b7280">分发 + 回溯</text>
+      <text x="598" y="200" text-anchor="middle" font-size="9" fill="#9ca3af">验收：快</text>
+
+      <line x1="648" y1="161" x2="674" y2="161" stroke="#be123c" stroke-width="1.5"/>
+      <line x1="674" y1="95" x2="674" y2="227" stroke="#be123c" stroke-width="1.5"/>
+      <line x1="674" y1="95" x2="692" y2="95" stroke="#be123c" stroke-width="1.5" marker-end="url(#f1-out)"/>
+      <line x1="674" y1="161" x2="692" y2="161" stroke="#be123c" stroke-width="1.5" marker-end="url(#f1-out)"/>
+      <line x1="674" y1="227" x2="692" y2="227" stroke="#be123c" stroke-width="1.5" marker-end="url(#f1-out)"/>
+
+      <rect x="695" y="73" width="150" height="44" rx="7" fill="#fff1f2" stroke="#be123c" stroke-width="1.2"/>
+      <text x="770" y="92" text-anchor="middle" font-size="10" font-weight="700" fill="#be123c">处置级告警</text>
+      <text x="770" y="107" text-anchor="middle" font-size="8.5" fill="#6b7280">事实判断 · 召回优先</text>
+
+      <rect x="695" y="139" width="150" height="44" rx="7" fill="#fff1f2" stroke="#be123c" stroke-width="1.2"/>
+      <text x="770" y="158" text-anchor="middle" font-size="10" font-weight="700" fill="#be123c">关注级线索</text>
+      <text x="770" y="173" text-anchor="middle" font-size="8.5" fill="#6b7280">风险判断 · 精确优先</text>
+
+      <rect x="695" y="205" width="150" height="44" rx="7" fill="#fff1f2" stroke="#be123c" stroke-width="1.2"/>
+      <text x="770" y="224" text-anchor="middle" font-size="10" font-weight="700" fill="#be123c">共现关系图</text>
+      <text x="770" y="239" text-anchor="middle" font-size="8.5" fill="#6b7280">周期汇总 · 人工研判</text>
+
+      <rect x="182" y="320" width="663" height="115" rx="12" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.8"/>
+      <ellipse cx="514" cy="330" rx="322" ry="8" fill="#ccfbf1" stroke="#0f766e" stroke-width="1"/>
+      <text x="206" y="360" font-size="13" font-weight="700" fill="#0f766e">时空记忆库 · 智能体的大脑 · 横贯基座</text>
+      <text x="206" y="378" font-size="10" fill="#0f766e">所有历史轨迹的匿名档案：时空路径 · 外观向量 · 区域序列 · 行为/事件标签 · 质量分 · 关联置信度</text>
+      <text x="206" y="395" font-size="9.5" fill="#64748b">四类索引：时间 · 空间 · 向量 · ID　｜　不存人脸、不存身份，只存匿名轨迹</text>
+
+      <rect x="206" y="405" width="78" height="20" rx="4" fill="#fff" stroke="#99f6e4" stroke-width="1"/>
+      <text x="245" y="418" text-anchor="middle" font-size="9" fill="#0f766e" font-weight="600">基线分布</text>
+      <rect x="292" y="405" width="78" height="20" rx="4" fill="#fff" stroke="#99f6e4" stroke-width="1"/>
+      <text x="331" y="418" text-anchor="middle" font-size="9" fill="#0f766e" font-weight="600">历史轨迹</text>
+      <rect x="378" y="405" width="78" height="20" rx="4" fill="#fff" stroke="#99f6e4" stroke-width="1"/>
+      <text x="417" y="418" text-anchor="middle" font-size="9" fill="#0f766e" font-weight="600">共现关系</text>
+      <rect x="464" y="405" width="78" height="20" rx="4" fill="#fff" stroke="#99f6e4" stroke-width="1"/>
+      <text x="503" y="418" text-anchor="middle" font-size="9" fill="#0f766e" font-weight="600">语义标签</text>
+      <rect x="550" y="405" width="78" height="20" rx="4" fill="#fff" stroke="#99f6e4" stroke-width="1"/>
+      <text x="589" y="418" text-anchor="middle" font-size="9" fill="#0f766e" font-weight="600">质量分</text>
+
+      <line x1="232" y1="207" x2="232" y2="320" stroke="#0f766e" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#f1-mem)"/>
+      <text x="240" y="268" font-size="9" fill="#0f766e" font-weight="700">↓ 写入</text>
+
+      <line x1="415" y1="250" x2="415" y2="320" stroke="#0f766e" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#f1-mem)"/>
+      <text x="423" y="290" font-size="9" fill="#0f766e" font-weight="700">↑ 读取</text>
+
+      <line x1="598" y1="207" x2="598" y2="320" stroke="#0f766e" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#f1-mem)"/>
+      <text x="606" y="268" font-size="9" fill="#0f766e" font-weight="700">↓ 回溯查</text>
+
+      <text x="520" y="470" text-anchor="middle" font-size="10" fill="#9ca3af">主链三步：感知建线 → 理解读线 → 决策用线；记忆库横贯底部，是支撑三步的基座</text>
+    </svg>
+    <figcaption><b>三层处理 + 一个基座</b>：感知把线写入记忆库，理解从记忆库读取并做三级判断，决策在回溯时查询记忆库并分发三类输出。<b>记忆库横贯底部，是支撑三步的基座。</b></figcaption>
+  </figure>
+
+  <h3 class="sub">每一层做什么、产出什么、验收什么</h3>
+
+  <div class="layer-cards">
+    <div class="layer-card per">
+      <div class="lc-side">
+        <span class="lc-name">感知</span>
+        <span class="lc-sub">建线</span>
+      </div>
+      <div class="lc-body">
+        <div class="k">做什么</div>
+        <div class="v">在每一帧画面中<b>找点</b>（检测），把同一人的点<b>连成连续的线</b>（单镜跟踪 + 跨镜关联）；质量评估标记哪些点不可信。</div>
+        <div class="k">回答什么</div>
+        <div class="v">谁在哪？是不是同一个人？</div>
+        <div class="k">产出</div>
+        <div class="v">带 ID 的时空曲线，<b>写入记忆基座</b>。</div>
+        <div class="k">验收</div>
+        <div class="v"><b>稳</b>——ID 不丢，遮挡后能恢复，轨迹连续。</div>
+      </div>
+    </div>
+
+    <div class="layer-card und">
+      <div class="lc-side">
+        <span class="lc-name">理解</span>
+        <span class="lc-sub">读线</span>
+      </div>
+      <div class="lc-body">
+        <div class="k">做什么</div>
+        <div class="v">读线的形态、线的突变、线与线的关系。分<b>三级递进</b>：</div>
+        <div class="k">三级判断</div>
+        <div class="v">
+          <div class="three-sub">
+            <div class="ts-item t1"><b>① 识形态</b>规则引擎识别已知苗头：逗留、徘徊、聚集、倒地、占道、禁区、共现</div>
+            <div class="ts-item t2"><b>② 辨偏离</b>只学正常基线，把不在任何已知正常簇中的线捞出来</div>
+            <div class="ts-item t3"><b>③ 释归因</b>视觉语言模型把统计偏离翻译成人能理解的描述</div>
+          </div>
+        </div>
+        <div class="k">产出</div>
+        <div class="v">语义标签——已知苗头、偏离候选、偏离描述。需要历史时<b>从记忆基座读取</b>。</div>
+        <div class="k">验收</div>
+        <div class="v"><b>准</b>——已知不漏，未知能捞，捞出来能解释。</div>
+      </div>
+    </div>
+
+    <div class="layer-card act">
+      <div class="lc-side">
+        <span class="lc-name">决策</span>
+        <span class="lc-sub">用线</span>
+      </div>
+      <div class="lc-body">
+        <div class="k">做什么</div>
+        <div class="v">把语义转成动作——<b>调度</b>（算力花在哪）、<b>告警分级</b>（处置级还是关注级）、<b>分发</b>（推给谁）、<b>回溯</b>（查记忆基座，找历史证据）。</div>
+        <div class="k">回答什么</div>
+        <div class="v">该不该管？怎么管？</div>
+        <div class="k">产出</div>
+        <div class="v">三类输出：<b>处置级告警</b>（事实判断，召回优先）、<b>关注级线索</b>（风险判断，精确优先）、<b>共现关系图</b>（周期汇总，人工研判）。</div>
+        <div class="k">验收</div>
+        <div class="v"><b>快</b>——延迟可接受，线索密度在运维可承受范围内，回溯检索响应快。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mem-box">
+    <span class="mem-title">时空记忆库 · 横贯底部的基座</span>
+    所有历史线的匿名档案。<b>感知向下写入，理解向上读取，决策向下查询。</b>不存人脸、不存身份，只存匿名轨迹——这是“只分析行为、不识别身份”在架构上的落点。
+    <div class="mem-fields">
+      <div class="mem-field"><b>时空路径</b>标定后的空间点序列</div>
+      <div class="mem-field"><b>外观向量</b>匿名嵌入，用于跨时段关联</div>
+      <div class="mem-field"><b>区域序列</b>经过的区域和顺序</div>
+      <div class="mem-field"><b>行为/事件标签</b>理解层读出的语义</div>
+      <div class="mem-field"><b>质量分</b>低照度、遮挡的置信度折扣</div>
+      <div class="mem-field"><b>关联置信度</b>确认还是疑似同一人</div>
+      <div class="mem-field"><b>四类索引</b>时间 · 空间 · 向量 · ID</div>
+      <div class="mem-field"><b>基线分布</b>各区域/时段的正常分布</div>
+    </div>
+  </div>
+
+  <div class="transition">
+    <b>本章讲清了系统由哪三层组成、记忆基座是什么。</b>但三层处理的原材料是什么？系统到底在读什么？下一章回答这个问题——<b>系统分析的是每个人在时空中留下的一条线，不同的线形态对应不同的风险语义。</b>
+    <span class="next">→ 下一章：读什么——时空中的六种线</span>
+  </div>
+
+  <!-- ============ 二、读什么 ============ -->
+  <h2 class="section" id="s2"><span class="idx">二、</span>读什么：时空中的六种线<span class="lead">系统的分析对象是什么，不同线形态对应什么风险语义</span></h2>
+
+  <p style="font-size:14px; color:#374151; line-height:1.8; margin:0 0 8px;">
+    系统的分析对象是<b>每个人在时空中留下的一条线</b>。不同的线形态对应不同的风险语义——正常穿行是平滑的线，异常逗留是水平段，反复徘徊是折返线，倒地是突变点，共现是两条并行接近的线，未知偏离是不在任何已知正常簇中的线。<b>六种线对应六种读法，覆盖从已知风险到未知风险的完整谱系。</b>
+  </p>
+
+  <figure>
+    <span class="fig-tag">图 2 · 时空中的六种线</span>
+    <svg viewBox="0 0 1000 480" role="img" aria-label="时空坐标系中的六条轨迹：正常穿行、异常逗留、反复徘徊、倒地、共现、未知偏离">
+      <defs>
+        <marker id="axis" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L9,3.5 L0,7 z" fill="#94a3b8"/>
+        </marker>
+      </defs>
+
+      <rect x="0" y="0" width="1000" height="480" fill="#fff"/>
+
+      <g stroke="#f1f5f9" stroke-width="1">
+        <line x1="80" y1="100" x2="940" y2="100"/>
+        <line x1="80" y1="160" x2="940" y2="160"/>
+        <line x1="80" y1="220" x2="940" y2="220"/>
+        <line x1="80" y1="280" x2="940" y2="280"/>
+        <line x1="80" y1="340" x2="940" y2="340"/>
+        <line x1="280" y1="60" x2="280" y2="400"/>
+        <line x1="480" y1="60" x2="480" y2="400"/>
+        <line x1="680" y1="60" x2="680" y2="400"/>
+        <line x1="880" y1="60" x2="880" y2="400"/>
+      </g>
+
+      <line x1="80" y1="400" x2="940" y2="400" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#axis)"/>
+      <text x="945" y="405" font-size="12.5" fill="#475569" font-weight="600">时间 t</text>
+      <line x1="80" y1="400" x2="80" y2="60" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#axis)"/>
+      <text x="60" y="58" font-size="12.5" fill="#475569" font-weight="600" text-anchor="middle">空间</text>
+      <text x="60" y="75" font-size="10.5" fill="#94a3b8" text-anchor="middle">位置</text>
+
+      <path d="M 100,90 C 200,110 300,150 400,175 C 500,195 600,205 700,210"
+            fill="none" stroke="#0e9f6e" stroke-width="3" stroke-linecap="round"/>
+      <text x="100" y="78" font-size="11.5" fill="#0e9f6e" font-weight="700">正常穿行</text>
+      <text x="100" y="93" font-size="9.8" fill="#059669">位置平滑变化</text>
+
+      <path d="M 100,140 C 160,145 220,150 280,152 L 420,152 C 480,155 540,165 600,180"
+            fill="none" stroke="#7e3af2" stroke-width="3" stroke-linecap="round"/>
+      <rect x="278" y="144" width="146" height="16" rx="3" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="351" y="156" text-anchor="middle" font-size="9.5" fill="#7e3af2" font-weight="600">位置不变 · 时间流逝</text>
+      <text x="100" y="128" font-size="11.5" fill="#7e3af2" font-weight="700">异常逗留</text>
+      <text x="100" y="143" font-size="9.8" fill="#6d28d9">水平段 = 停留</text>
+
+      <path d="M 100,240 Q 140,200 180,240 Q 220,280 260,240 Q 300,200 340,240 Q 380,280 420,240 Q 460,200 500,240 Q 540,280 580,240"
+            fill="none" stroke="#c27803" stroke-width="3" stroke-linecap="round"/>
+      <text x="100" y="228" font-size="11.5" fill="#c27803" font-weight="700">反复徘徊</text>
+      <text x="100" y="243" font-size="9.8" fill="#b45309">线反复折返</text>
+
+      <path d="M 640,90 C 670,92 700,95 730,98 L 755,98 C 775,100 795,300 825,345 L 900,345"
+            fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="755" cy="98" r="4.5" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+      <line x1="755" y1="98" x2="755" y2="345" stroke="#dc2626" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
+      <text x="640" y="78" font-size="11.5" fill="#dc2626" font-weight="700">倒地</text>
+      <text x="640" y="93" font-size="9.8" fill="#b91c1c">线上的突变点</text>
+      <text x="765" y="88" font-size="9.5" fill="#dc2626">从高处坠落到低处</text>
+
+      <path d="M 100,310 C 200,308 300,306 400,305 C 500,304 600,303 720,302"
+            fill="none" stroke="#0891b2" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M 100,330 C 200,328 300,326 400,325 C 500,324 600,323 720,322"
+            fill="none" stroke="#0891b2" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="380" y1="305" x2="380" y2="325" stroke="#0891b2" stroke-width="1.2" stroke-dasharray="2 2"/>
+      <line x1="620" y1="303" x2="620" y2="323" stroke="#0891b2" stroke-width="1.2" stroke-dasharray="2 2"/>
+      <text x="500" y="295" text-anchor="middle" font-size="10" fill="#0891b2" font-weight="600">两条线持续接近 · 同行</text>
+      <text x="100" y="298" font-size="11.5" fill="#0891b2" font-weight="700">共现</text>
+      <text x="100" y="313" font-size="9.8" fill="#0e7490">两条线的关系</text>
+
+      <path d="M 760,240 C 785,232 800,258 820,238 C 838,220 852,255 872,240 C 888,228 902,252 918,242 C 930,235 940,248 948,240"
+            fill="none" stroke="#64748b" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="6 4"/>
+      <text x="760" y="228" font-size="11.5" fill="#475569" font-weight="700">未知偏离</text>
+      <text x="760" y="243" font-size="9.8" fill="#64748b">不在任何已知正常簇</text>
+
+      <text x="500" y="455" text-anchor="middle" font-size="11" fill="#9ca3af">前五条是已知可定义的苗头谱系；灰色虚线是“基线偏离”捞出的未知候选</text>
+    </svg>
+    <figcaption><b>六种线，六种读法</b>：正常穿行、异常逗留、反复徘徊、倒地、共现，对应可人工定义的苗头谱系；灰色虚线不在任何已知正常模式中，对应无法人工定义、只能靠基线偏离去捞的隐性风险。</figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:18%">线形态</th>
+          <th style="width:22%">对应的风险语义</th>
+          <th style="width:30%">判据的核心</th>
+          <th>归到哪一级理解</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>平滑的线</b></td>
+          <td>正常穿行</td>
+          <td>位置随时间平滑变化，路径效率高</td>
+          <td>作为正常基线的一部分，不触发告警</td>
+        </tr>
+        <tr>
+          <td><b>水平段</b></td>
+          <td>异常逗留</td>
+          <td>位置不变、时间流逝，停留时长超出区域正常分布</td>
+          <td>识形态——已知苗头</td>
+        </tr>
+        <tr>
+          <td><b>折返线</b></td>
+          <td>反复徘徊</td>
+          <td>方向反转频繁，路径效率极低</td>
+          <td>识形态——已知苗头</td>
+        </tr>
+        <tr>
+          <td><b>突变点</b></td>
+          <td>倒地 / 占道 / 禁区进入</td>
+          <td>线上发生不可逆的形态跳变，如宽高比反转、位移趋零</td>
+          <td>识形态——事实判断</td>
+        </tr>
+        <tr>
+          <td><b>两条并行线</b></td>
+          <td>共现 / 结伴</td>
+          <td>两条线在时间轴和空间轴上持续接近</td>
+          <td>识形态——已知苗头</td>
+        </tr>
+        <tr>
+          <td><b>不属于任何已知模式的线</b></td>
+          <td>未知偏离</td>
+          <td>不在任何已知正常簇中，偏离程度高</td>
+          <td>辨偏离——未知候选</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <b>为什么用“线”而不是“动作”来定义分析对象：</b>动作是瞬时的、局部的，而风险苗头往往是<b>时间维度上的模式</b>——异常逗留需要看几分钟的停留，反复徘徊需要看几十秒的轨迹形态，共现需要看多天的累积。用“线”作为分析对象，才能把这些时间维度上的模式统一到同一个框架里。
+  </div>
+
+  <div class="transition">
+    <b>本章讲清了系统在读什么——时空中的六种线。</b>那么这些线怎么建出来、怎么读、怎么用？下一章回答“怎么建”——两条实施路径，路径 A 用公开数据快速跑通，路径 B 用真实数据从零搭建。
+    <span class="next">→ 下一章：怎么建——两条实施路径</span>
+  </div>
+
+  <!-- ============ 三、怎么建 ============ -->
+  <h2 class="section" id="s3"><span class="idx">三、</span>怎么建：两条实施路径<span class="lead">路径 A 公开数据先行，路径 B 真实数据为骨架；区别不在架构，而在数据策略</span></h2>
+
+  <div class="thesis" style="margin:16px 0 24px;">
+    <span class="big">两条路径，区别不在架构，而在数据策略。</span>
+    <b>路径 A</b>用公开数据先把成熟平台跑通，真实数据只做少量校准——产出的是<b>认知</b>：通用阈值在你的场景哪里不准、需求方对“系统能看见什么”的直观理解。<br>
+    <b>路径 B</b>用真实自采数据做骨架，从零搭建三层处理和记忆基座——产出的是<b>架构</b>：可控、可解释、能按需求演进。<br>
+    两条路径不互斥：<b>路径 A 可以作为路径 B 的快速原型</b>，先验证需求，再决定哪些模块值得自建。
+  </div>
+
+  <figure>
+    <span class="fig-tag">图 3 · 两条路径的数据角色对比</span>
+    <svg viewBox="0 0 1000 310" role="img" aria-label="路径A与路径B的数据角色对比">
+      <defs>
+        <marker id="f2-arr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L9,3.5 L0,7 z" fill="#b45309"/>
+        </marker>
+      </defs>
+      <rect x="0" y="0" width="1000" height="310" fill="#fff"/>
+
+      <rect x="30" y="25" width="420" height="235" rx="12" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.8"/>
+      <text x="240" y="52" text-anchor="middle" font-size="15" font-weight="700" fill="#0284c7">路径 A · 快速出效果</text>
+      <text x="240" y="70" text-anchor="middle" font-size="11" fill="#6b7280">基于成熟平台，1—2 个月跑通</text>
+
+      <rect x="55" y="92" width="280" height="48" rx="7" fill="#e0f2fe" stroke="#0369a1" stroke-width="1.5"/>
+      <text x="195" y="113" text-anchor="middle" font-size="12" font-weight="700" fill="#0369a1">公开数据集 · 主角</text>
+      <text x="195" y="130" text-anchor="middle" font-size="9.8" fill="#0369a1">MOT17 / CrowdHuman / Loitering</text>
+
+      <rect x="350" y="92" width="80" height="48" rx="7" fill="#fce7f3" stroke="#9d174d" stroke-width="1.5"/>
+      <text x="390" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#9d174d">真实数据</text>
+      <text x="390" y="130" text-anchor="middle" font-size="9.5" fill="#9d174d">少量校准</text>
+
+      <text x="55" y="168" font-size="10.5" fill="#374151" font-weight="600">数据策略：</text>
+      <text x="55" y="186" font-size="10" fill="#374151">① 公开数据跑通平台预置检测</text>
+      <text x="55" y="203" font-size="10" fill="#374151">② 接真实视频观察通用阈值偏差</text>
+      <text x="55" y="220" font-size="10" fill="#374151">③ 少量真实数据校准区域阈值</text>
+      <text x="55" y="237" font-size="10" fill="#374151">④ 困难负样本从真实数据人工筛</text>
+
+      <rect x="550" y="25" width="420" height="235" rx="12" fill="#f5f3ff" stroke="#7e3af2" stroke-width="1.8"/>
+      <text x="760" y="52" text-anchor="middle" font-size="15" font-weight="700" fill="#7e3af2">路径 B · 从零搭建智能体</text>
+      <text x="760" y="70" text-anchor="middle" font-size="11" fill="#6b7280">三层处理逐层落地，4—6 个月</text>
+
+      <rect x="575" y="92" width="280" height="48" rx="7" fill="#fce7f3" stroke="#9d174d" stroke-width="1.5"/>
+      <text x="715" y="113" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">真实自采数据 · 骨架</text>
+      <text x="715" y="130" text-anchor="middle" font-size="9.8" fill="#9d174d">正常基线 / 困难负样本 / 回溯测试集</text>
+
+      <rect x="870" y="92" width="80" height="48" rx="7" fill="#e0f2fe" stroke="#0369a1" stroke-width="1.5"/>
+      <text x="910" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#0369a1">公开数据</text>
+      <text x="910" y="130" text-anchor="middle" font-size="9.5" fill="#0369a1">仅做参照</text>
+
+      <text x="575" y="168" font-size="10.5" fill="#374151" font-weight="600">数据策略：</text>
+      <text x="575" y="186" font-size="10" fill="#374151">① 正常基线连续 3—4 周真实采集</text>
+      <text x="575" y="203" font-size="10" fill="#374151">② 公开数据只做检测/跟踪骨干预训练</text>
+      <text x="575" y="220" font-size="10" fill="#374151">③ 徘徊/倒地方法论借鉴公开数据集</text>
+      <text x="575" y="237" font-size="10" fill="#374151">④ 回溯测试集必须来自真实场景或演练</text>
+
+      <line x1="450" y1="145" x2="545" y2="145" stroke="#b45309" stroke-width="2.5" marker-end="url(#f2-arr)"/>
+      <text x="498" y="133" text-anchor="middle" font-size="9.8" fill="#b45309" font-weight="600">可作为原型</text>
+      <text x="498" y="165" text-anchor="middle" font-size="9.8" fill="#b45309" font-weight="600">过渡到</text>
+
+      <text x="500" y="290" text-anchor="middle" font-size="10" fill="#9ca3af">同一个三层架构，两条路径的数据依赖方向相反；路径 A 验证需求，路径 B 交付架构</text>
+    </svg>
+    <figcaption><b>数据角色对比</b>：路径 A 用公开数据先跑通，真实数据只做少量校准；路径 B 用真实自采数据做骨架，公开数据只做参照。路径 A 可以作为路径 B 的快速原型。</figcaption>
+  </figure>
+
+  <!-- 路径 A -->
+  <h3 class="sub">路径 A：公开数据先行，1—2 个月跑通闭环</h3>
+
+  <div class="path-block path-card-a">
+    <div class="path-head">
+      <div class="path-badge">A<small>公开数据</small></div>
+      <div class="path-title">基于成熟平台快速搭建<small>适合“先让需求方看到系统能跑”的阶段</small></div>
+      <div class="path-tag">六步</div>
+    </div>
+    <div class="path-body">
+      <p>这条路径的核心是<b>不自己训练大模型</b>，用 videopipe-fastapi 等成熟平台的内置能力快速搭建，<b>先用公开数据集验证平台能跑</b>，再接真实视频做少量校准。<b>产出的是认知，不是最终交付物。</b></p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">1</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-deploy">部署</span>平台基础环境</div>
+              <div class="sdesc">按官方 README 用 docker-compose 拉起 PostgreSQL、Milvus、Kafka、MinIO，<code>pip install -r requirements.txt</code>，启动 FastAPI 后端和 Vue3 前端。<b>坑主要在 Kafka 的 advertised listeners 和 Milvus 的内存要求</b>，不在代码本身。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            无——这一步只验证环境能起来。
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">2</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-per">感知 / 理解</span>用公开数据集验证预置行为检测</div>
+              <div class="sdesc">把 MOT17 或 Loitering Dataset 转成平台支持的输入格式，启用<b>长时间徘徊、人群聚集、摔倒</b>三个预置检测，跑通“检测→规则→报警”链路。<b>目的不是验收，是确认平台能正常工作</b>。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-pub">MOT17</span> 验证跟踪与轨迹分析
+            <span class="d-tag d-pub">Loitering Dataset</span> 验证徘徊检测
+            <span class="d-tag d-pub">PAB</span> 验证倒地/躺卧姿态
+            <div class="data-ref">数据细节见第四章 B 类 · 参考公开数据集</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">3</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-per">感知</span>接 1—2 路真实视频，观察通用阈值偏差</div>
+              <div class="sdesc">用真实公共空间视频接入平台，跑 1—2 天，<b>记录误报和漏报的具体模式</b>：摊位区正常交易被误判为徘徊、货架后消失被误判为异常逗留、出入口高峰聚集被误报等。这一步产出的是<b>“通用阈值哪里不准”的清单</b>。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实视频</span> 1—2 路，1—2 天，<b>仅用于观察，不做训练</b>
+            <div class="data-ref">数据细节见第四章 A 类 · 采集方式</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">4</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-und">理解</span>用少量真实正常数据校准区域分层阈值</div>
+              <div class="sdesc">采集<b>每个区域 2—3 天的正常数据</b>，统计每个区域的停留时长分布、人数分布，把平台的预置阈值改成<b>区域分层阈值</b>。这一步能消除大部分“正常交易被误报为徘徊”的问题。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实正常数据（A类）</span> 每区域 2—3 天，<b>量小但必须有</b>，同时写入记忆基座
+            <div class="data-ref">数据细节见第四章 A 类 · 规模与采集时机</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">5</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-und">理解</span>从真实数据中人工筛困难负样本</div>
+              <div class="sdesc">平台不会自动标出“蹲取、搬运、正常聚集、等人”这些片段，需要<b>人工过一遍</b>，形成误报压测集。这是路径 A 唯一需要额外人工投入的环节，<b>但不做，上线后会被误报淹掉</b>。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实数据（C类）</span> 从步骤 3—4 的数据中定向筛选，每类 ≥200 段
+            <div class="data-ref">数据细节见第四章 C 类 · 采集方式与规模</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">6</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-und">理解</span>（可选）补偏离评分与语义归因</div>
+              <div class="sdesc">平台本身没有“分层基线偏离”层。可以在报警链路之后挂一个轻量偏离评分模块，把“规则未命中但轨迹形态不寻常”的片段也捞出来；平台的 Qwen-VL 二次确认可以复用，但<b>只做解释，不替规则做判决</b>。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实正常数据</span> 复用步骤 4
+            <div class="data-ref">数据细节见第四章 A 类</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-box">
+        <b>路径 A 的数据底线：</b>公开数据可以让你把平台跑起来、验证功能是否正常，但<b>阈值校准和困难负样本必须用真实数据</b>。路径 A 可以不用真实数据做训练，但不能不用真实数据做校准。
+      </div>
+    </div>
+  </div>
+
+  <!-- 路径 B -->
+  <h3 class="sub">路径 B：真实数据为骨架，4—6 个月从零搭建</h3>
+
+  <div class="path-block path-card-b">
+    <div class="path-head">
+      <div class="path-badge">B<small>真实数据</small></div>
+      <div class="path-title">按三层处理逐层落地<small>适合“架构可控、能按需求演进”的阶段</small></div>
+      <div class="path-tag">七步</div>
+    </div>
+    <div class="path-body">
+      <p>这条路径的核心是<b>自己搭“时空记忆智能体”</b>，按感知→理解→决策三步逐层落地，<b>记忆基座与感知同步建设</b>。<b>真实自采数据是骨架</b>，公开数据只用于检测/跟踪骨干的预训练和方法论参照。<b>产出的是最终交付架构。</b></p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">1</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-per">感知</span>检测 + 跟踪 + 质量门控</div>
+              <div class="sdesc">YOLO11n 用 COCO 预训练权重起步，在 <b>CrowdHuman</b> 上微调；跟踪用 <b>BoxMOT + ByteTrack</b>，在 <b>MOT17</b> 上验证基线；质量门控用轻量分类器输出亮度、模糊、遮挡比例。感知的产出同时<b>向下写入记忆基座</b>。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-pub">CrowdHuman</span> 检测骨干微调
+            <span class="d-tag d-pub">MOT17 / DanceTrack</span> 跟踪基线验证
+            <span class="d-tag d-real">真实退化数据（D类）</span> 夜间/沙尘/逆光 ≥80 小时，质量门控训练
+            <div class="data-ref">数据细节见第四章 A 类、D 类</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">2</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-mem">记忆基座</span>轨迹库 + 向量索引（与感知同步建设）</div>
+              <div class="sdesc"><b>注意：这不是主链上的一个顺序步骤，而是与感知同步建设的支撑设施。</b>每条轨迹结束后，外观向量写 <b>Milvus</b>，结构化字段写 <b>PostgreSQL</b>（trace_id、camera_id、起止时间、区域序列、标签、质量分、关联置信度），媒体片段写 <b>MinIO</b>。四类索引：时间、空间、向量、ID。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实正常轨迹（A类）</span> 连续采集 3—4 周（150—200 小时），<b>记忆基座的第一批数据，辨偏离的唯一输入</b>
+            <div class="data-ref">数据细节见第四章 A 类 · 规模与采集时机</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">3</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-und">理解①</span>识形态：规则引擎</div>
+              <div class="sdesc">纯 Python 实现，阈值可配置化。核心规则：异常逗留（停留 > 区域 95 分位 + 路径效率 < 0.4）、反复徘徊（反转 ≥ 3 次 + 效率 < 0.3）、快速聚集（60 秒内人数从 <3 到 ≥6）、倒地（宽高比反转 + 位移 ≈ 0 + 持续 ≥ 30 秒 + 不在正常蹲取区）。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实正常数据（A类）</span> 建立区域分层阈值分布
+            <span class="d-tag d-real">真实正例（B类）</span> 几十条即可校准检出率
+            <span class="d-tag d-pub">Loitering Dataset</span> 徘徊参数化方法参考
+            <span class="d-tag d-pub">PAB</span> 倒地姿态辅助参考
+            <div class="data-ref">数据细节见第四章 A 类、B 类 · 逐类详细规划</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">4</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-und">理解②</span>辨偏离：分层正常基线</div>
+              <div class="sdesc">这是路径 B 的核心增量，也是平台没有的。只学正常样本，按区域、时段、人群类型建分层基线（孤立森林或轻量 Bi-LSTM-AE），输入是滑动窗口内的轨迹特征向量。<b>产出不是语义标签，而是“非典型轨迹”候选 + 偏离分数</b>，候选进巡检池，不进实时告警。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实正常数据（A类）</span> <b>这是唯一输入，公开数据完全无法替代</b>，从记忆基座读取
+            <div class="data-ref">数据细节见第四章 A 类 · 规模与关键约束</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">5</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-und">理解③</span>释归因：VLM 零样本翻译</div>
+              <div class="sdesc">对偏离候选的轨迹片段生成自然语言描述，零样本语义评分，把“统计偏离”翻译成“人能理解的描述”。参考 <b>AnyAnomaly</b> 的零样本 VQA 思路，<b>不训练、不微调</b>。边缘算力紧张时，候选片段回传服务器异步归因。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实偏离候选</span> 用于人工评估描述质量
+            <span class="d-tag d-pub">AnyAnomaly</span> 方法参考，无需训练数据
+            <div class="data-ref">数据细节见第四章 B 类 · 可参考的公开数据集</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">6</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-act">决策</span>分发 + 回溯 + 主动检索</div>
+              <div class="sdesc">FastAPI 暴露接口；Kafka/Redis 做报警过滤去重；<b>SigLIP</b> 做主动查询（图像或文本找特定的人），低分候选进人工确认队列；Vue3 或轻量前端做俯视地图、事件时间轴、轨迹回放。<b>回溯时查询记忆基座</b>，按时间、空间、外观找到历史线。</div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实回溯测试集（E类）</span> 每类事件 ≥20 段，用于验收和演示
+            <span class="d-tag d-pub">RSTPReid</span> SigLIP 检索阈值校准
+            <div class="data-ref">数据细节见第四章 E 类、参考公共数据集总表</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head-row">
+            <span class="sno">7</span>
+            <div>
+              <div class="stitle"><span class="layer-tag layer-deploy">部署</span>边缘落地：8 路 1080p</div>
+              <div class="sdesc">单节点 <b>AGX Orin 64GB</b> 余量充足；或 <b>2×Orin NX 16GB</b> 拆分，每节点 4 路，跨节点轨迹元数据聚合。DeepStream 提供 NVDEC 硬解、TensorRT 推理、NvDCF 跟踪的零拷贝流水线。<b>DeepStream 只负责把延迟和功耗压下来，规则、基线、归因仍在你的上层模块。</b></div>
+            </div>
+          </div>
+          <div class="data-block">
+            <div class="dl">需要哪类数据</div>
+            <span class="d-tag d-real">真实运行数据</span> 现场连续运行，收集误报/漏报，回传困难样本持续迭代
+            <div class="data-ref">数据细节见第四章 A 类、C 类 · 持续迭代部分</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-box">
+        <b>路径 B 的数据底线：</b>公开数据只能做两件事——<b>检测/跟踪骨干的预训练</b>和<b>方法论参照</b>。记忆基座的分层基线、困难负样本、回溯测试集，<b>公开数据一律不能替代</b>，因为它们是“你场景的正常”和“你场景的异常”。<b>数据采集不是前置阶段，而是从感知层开始贯穿始终的并行线。</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- 路径衔接 -->
+  <h3 class="sub">两条路径怎么衔接</h3>
+
+  <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center; margin:20px 0; padding:20px 24px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px;">
+    <div style="font-size:13.5px; line-height:1.7;">
+      <b style="display:block; font-size:14.5px; margin-bottom:4px; color:var(--pathA);">路径 A 产出的三样东西</b>
+      ① “通用阈值在你的场景哪里不准”的清单<br>
+      ② 从真实数据中筛出的困难负样本集<br>
+      ③ 需求方对“系统能看见什么”的直观认知
+    </div>
+    <div style="font-size:28px; color:#b45309; font-weight:700;">→</div>
+    <div style="font-size:13.5px; line-height:1.7;">
+      <b style="display:block; font-size:14.5px; margin-bottom:4px; color:var(--pathB);">路径 B 直接复用这三样东西</b>
+      ① 清单决定哪些规则需要重点校准<br>
+      ② 负样本集直接进入误报压测<br>
+      ③ 直观认知决定一期范围优先覆盖哪几类
+    </div>
+  </div>
+
+  <div class="note-box">
+    <b>建议的推进节奏：</b>先用 <b>路径 A</b> 跑 1—2 个月，用公开数据把平台跑通，接 1—2 路真实视频暴露阈值偏差，同时和需求方对齐“一期覆盖哪几类可定义风险”和“能否组织现场演练”。<b>路径 A 跑通后，再决定路径 B 的投入范围</b>。
+  </div>
+
+  <!-- 技术选型对照表 -->
+  <h3 class="sub">技术选型对照表</h3>
+
+  <p style="font-size:14px; color:#374151; line-height:1.8; margin:0 0 6px;">
+    路径 B 每一层用到的具体技术选型如下。<b>第一版优先用轻量、可替换的开源件</b>，不追求最前沿；等闭环跑通、数据到位后，再逐层升级。
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:12%">层</th>
+          <th style="width:20%">组件</th>
+          <th style="width:26%">选型</th>
+          <th>选型理由 / 备选</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>感知</b></td>
+          <td>检测器</td>
+          <td><code>YOLO11n</code>（Ultralytics）</td>
+          <td>轻量、CPU 可跑、社区成熟；备选 RT-DETR（精度更高但边缘端吞吐差）</td>
+        </tr>
+        <tr>
+          <td><b>感知</b></td>
+          <td>跟踪器</td>
+          <td><code>BoxMOT + ByteTrack</code></td>
+          <td>ByteTrack 保留低分框的两阶段关联，适合遮挡恢复；BoT-SORT 作为精度对照备选</td>
+        </tr>
+        <tr>
+          <td><b>感知</b></td>
+          <td>质量门控</td>
+          <td>MobileNetV3 级轻量分类器</td>
+          <td>输出亮度、模糊、遮挡比例、逆光标记，作为下游置信度折扣因子</td>
+        </tr>
+        <tr>
+          <td><b>记忆</b></td>
+          <td>向量存储</td>
+          <td><code>Milvus</code></td>
+          <td>向量检索事实标准；备选 FAISS（更轻但无分布式）</td>
+        </tr>
+        <tr>
+          <td><b>记忆</b></td>
+          <td>结构化存储</td>
+          <td><code>PostgreSQL</code></td>
+          <td>轨迹元数据、区域序列、标签、质量分</td>
+        </tr>
+        <tr>
+          <td><b>记忆</b></td>
+          <td>媒体存储</td>
+          <td><code>MinIO</code></td>
+          <td>事件片段和快照；原始视频不出场站</td>
+        </tr>
+        <tr>
+          <td><b>理解①</b></td>
+          <td>规则引擎</td>
+          <td>纯 Python 自建</td>
+          <td>阈值可配置化，按区域和时段分层；不依赖外部规则引擎</td>
+        </tr>
+        <tr>
+          <td><b>理解②</b></td>
+          <td>正常基线</td>
+          <td>孤立森林 / 轻量 Bi-LSTM-AE</td>
+          <td>只学正常样本，输出偏离分数；不追求深度模型，先跑通再升级</td>
+        </tr>
+        <tr>
+          <td><b>理解③</b></td>
+          <td>语义归因</td>
+          <td>Vision-LLM 零样本（参考 AnyAnomaly）</td>
+          <td>不训练、不微调；边缘算力紧张时服务器端异步归因</td>
+        </tr>
+        <tr>
+          <td><b>决策</b></td>
+          <td>服务框架</td>
+          <td><code>FastAPI</code></td>
+          <td>暴露轨迹查询、事件分发、回溯检索接口</td>
+        </tr>
+        <tr>
+          <td><b>决策</b></td>
+          <td>消息分发</td>
+          <td><code>Kafka / Redis Stream</code></td>
+          <td>报警过滤、去重、防抖</td>
+        </tr>
+        <tr>
+          <td><b>决策</b></td>
+          <td>主动检索</td>
+          <td><code>SigLIP</code>（DeepStream 插件或 ONNX 服务器）</td>
+          <td>图像或文本找特定的人；低分候选进人工确认队列</td>
+        </tr>
+        <tr>
+          <td><b>决策</b></td>
+          <td>展示</td>
+          <td>Vue3 或轻量 Web 前端</td>
+          <td>俯视地图 + 事件时间轴 + 轨迹回放 + 质量面板</td>
+        </tr>
+        <tr>
+          <td><b>部署</b></td>
+          <td>边缘运行时</td>
+          <td><code>DeepStream</code> + TensorRT</td>
+          <td>NVDEC 硬解、零拷贝流水线；只负责把延迟和功耗压下来</td>
+        </tr>
+        <tr>
+          <td><b>部署</b></td>
+          <td>边缘硬件</td>
+          <td>AGX Orin 64GB 或 2×Orin NX 16GB</td>
+          <td>8 路 1080p；单节点或双节点拆分，视成本和冗余需求</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 边缘部署与资源估算 -->
+  <h3 class="sub">边缘部署与资源估算</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:22%">项目</th>
+          <th style="width:38%">估算</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>训练资源</b></td>
+          <td>1 张 RTX 4090（24GB）</td>
+          <td>检测器微调 2—4 天；异常评分模型数小时；规则引擎不涉及 GPU 训练</td>
+        </tr>
+        <tr>
+          <td><b>推理节点</b></td>
+          <td>AGX Orin 64GB ×1 或 Orin NX 16GB ×2</td>
+          <td>8 路 1080p；64GB 单节点余量充足，双节点拆分成本和冗余更灵活</td>
+        </tr>
+        <tr>
+          <td><b>存储</b></td>
+          <td>本地 NVMe ≥2TB</td>
+          <td>8 路 1080p@4Mbps 约 32Mbps 聚合；原始视频不出场站，只上传轨迹元数据和事件片段</td>
+        </tr>
+        <tr>
+          <td><b>告警延迟</b></td>
+          <td>语义层 1—3 秒；整体响应 5—15 秒</td>
+          <td>倒地事件因 30 秒持续判据，端到端延迟会天然多出 30 秒证据累积时间</td>
+        </tr>
+        <tr>
+          <td><b>可用性</b></td>
+          <td>8 路连续运行 ≥72 小时无显存泄漏</td>
+          <td>NVDEC 硬解 + DeepStream 管理到位的前提下可达；显存监控和环形缓冲策略需在部署前严格测试</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <b>一个必须提前对齐的工程约束：</b>8 路视频在边缘节点上的瓶颈通常不是推理算力，而是<b>解码和显存</b>。必须使用 <b>NVDEC 硬件解码 + DeepStream 流水线</b>，禁止用 OpenCV CPU 软解。DeepStream 只负责把解码、推理、跟踪的延迟和功耗压下来；规则、基线、归因仍然在你的上层模块里。
+  </div>
+
+  <div class="transition">
+    <b>本章讲清了怎么建——路径 A 快速出效果，路径 B 从零搭建。</b>两条路径的每一步都标注了“需要哪类数据”。那么这五类数据各自解决什么问题、怎么采、采多少、参考哪些公开数据集？下一章详细展开。
+    <span class="next">→ 下一章：用什么建——五类数据规划</span>
+  </div>
+
+  <!-- ============ 四、用什么建 ============ -->
+  <h2 class="section" id="s4"><span class="idx">四、</span>用什么建：五类数据规划<span class="lead">五类数据各自解决什么问题、怎么采、采多少、参考哪些公开数据集</span></h2>
+
+  <p style="font-size:14px; color:#374151; line-height:1.8; margin:0 0 8px;">
+    上一章两条路径的每一步都已经标注了“需要哪类数据”。这里把五类数据展开说清楚——<b>怎么做、做多少、谁负责、参考哪些公开数据集</b>。五类数据不是五个独立阶段，而是按需嵌入到路径 A 和路径 B 的对应步骤中。
+  </p>
+
+  <figure>
+    <span class="fig-tag">图 4 · 五类数据在项目周期中的位置</span>
+    <svg viewBox="0 0 1000 420" role="img" aria-label="五类数据在项目周期中的采集时间线，A类最早启动持续最久">
+      <defs>
+        <marker id="tl-arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <path d="M0,0 L9,3.5 L0,7 z" fill="#94a3b8"/>
+        </marker>
+      </defs>
+      <rect x="0" y="0" width="1000" height="420" fill="#fff"/>
+
+      <line x1="80" y1="370" x2="940" y2="370" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#tl-arrow)"/>
+      <text x="945" y="375" font-size="12" fill="#475569" font-weight="600">项目周期</text>
+      <g font-size="10.5" fill="#94a3b8">
+        <text x="120" y="392" text-anchor="middle">M1</text>
+        <text x="260" y="392" text-anchor="middle">M2</text>
+        <text x="400" y="392" text-anchor="middle">M3</text>
+        <text x="540" y="392" text-anchor="middle">M4</text>
+        <text x="680" y="392" text-anchor="middle">M5</text>
+        <text x="820" y="392" text-anchor="middle">M6</text>
+      </g>
+      <g stroke="#f1f5f9" stroke-width="1">
+        <line x1="120" y1="50" x2="120" y2="360"/>
+        <line x1="260" y1="50" x2="260" y2="360"/>
+        <line x1="400" y1="50" x2="400" y2="360"/>
+        <line x1="540" y1="50" x2="540" y2="360"/>
+        <line x1="680" y1="50" x2="680" y2="360"/>
+        <line x1="820" y1="50" x2="820" y2="360"/>
+      </g>
+
+      <text x="80" y="80" font-size="11.5" fill="#0369a1" font-weight="700">A 正常基线</text>
+      <rect x="120" y="66" width="460" height="24" rx="5" fill="#e0f2fe" stroke="#0369a1" stroke-width="1.2"/>
+      <text x="350" y="83" text-anchor="middle" font-size="10.5" fill="#0369a1" font-weight="600">连续 3—4 周采集，持续入库</text>
+
+      <text x="80" y="126" font-size="11.5" fill="#be123c" font-weight="700">B 正例/苗头</text>
+      <rect x="180" y="112" width="160" height="24" rx="5" fill="#fce7f3" stroke="#be123c" stroke-width="1.2"/>
+      <text x="260" y="129" text-anchor="middle" font-size="10.5" fill="#be123c" font-weight="600">历史回溯</text>
+      <rect x="360" y="112" width="160" height="24" rx="5" fill="#fce7f3" stroke="#be123c" stroke-width="1.2"/>
+      <text x="440" y="129" text-anchor="middle" font-size="10.5" fill="#be123c" font-weight="600">现场演练</text>
+
+      <text x="80" y="172" font-size="11.5" fill="#b45309" font-weight="700">C 困难负样本</text>
+      <rect x="300" y="158" width="320" height="24" rx="5" fill="#fef3c7" stroke="#b45309" stroke-width="1.2"/>
+      <text x="460" y="175" text-anchor="middle" font-size="10.5" fill="#b45309" font-weight="600">从 A 类中人工筛选，每类 ≥200 段</text>
+
+      <text x="80" y="218" font-size="11.5" fill="#0f766e" font-weight="700">D 退化条件</text>
+      <rect x="120" y="204" width="380" height="24" rx="5" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.2"/>
+      <text x="310" y="221" text-anchor="middle" font-size="10.5" fill="#0f766e" font-weight="600">夜间/沙尘/逆光 ≥80 小时</text>
+
+      <text x="80" y="264" font-size="11.5" fill="#6d28d9" font-weight="700">E 回溯测试集</text>
+      <rect x="500" y="250" width="260" height="24" rx="5" fill="#f5f3ff" stroke="#6d28d9" stroke-width="1.2"/>
+      <text x="630" y="267" text-anchor="middle" font-size="10.5" fill="#6d28d9" font-weight="600">最后成型，每类 ≥20 段</text>
+
+      <text x="80" y="320" font-size="11" fill="#374151" font-weight="600">关键判断：</text>
+      <text x="80" y="338" font-size="10.5" fill="#374151">A 类必须最早启动，因为“辨偏离”完全依赖正常基线；B 类靠三条路补，需提前谈资源；C 类决定系统能不能用，必须在试运行前完成压测。</text>
+      <text x="80" y="354" font-size="10.5" fill="#374151">D 类从 A 类筛选+针对性补采；E 类最后成型，是验收依据。</text>
+    </svg>
+    <figcaption><b>五类数据的时间位置</b>：A 类正常基线最早启动、持续最久；B 类正例靠历史回溯和现场演练补；C 类困难负样本从 A 类中筛选；D 类退化条件从 A 类中筛+补采；E 类回溯测试集最后成型。</figcaption>
+  </figure>
+
+  <div class="data-grid">
+    <div class="data-card da">
+      <div class="dc-head">A 类 · 正常基线</div>
+      <div class="dc-body">
+        <b>解决什么</b>
+        建分层正常分布，辨偏离的唯一输入
+        <b style="margin-top:6px;">规模</b>
+        连续 3—4 周，150—200 小时
+      </div>
+      <div class="dc-foot"><b>最早启动，持续最久</b></div>
+    </div>
+
+    <div class="data-card db">
+      <div class="dc-head">B 类 · 正例/苗头</div>
+      <div class="dc-body">
+        <b>解决什么</b>
+        规则阈值校准、演示、定性验证
+        <b style="margin-top:6px;">规模</b>
+        每类几十条即可，不追求统计显著
+      </div>
+      <div class="dc-foot"><b>靠三条路补，需提前谈资源</b></div>
+    </div>
+
+    <div class="data-card dc">
+      <div class="dc-head">C 类 · 困难负样本</div>
+      <div class="dc-body">
+        <b>解决什么</b>
+        压误报——决定系统上线后能不能用
+        <b style="margin-top:6px;">规模</b>
+        每类 ≥200 段，从 A 类筛
+      </div>
+      <div class="dc-foot"><b>试运行前必须完成压测</b></div>
+    </div>
+
+    <div class="data-card dd">
+      <div class="dc-head">D 类 · 退化条件</div>
+      <div class="dc-body">
+        <b>解决什么</b>
+        质量门控训练、低照度/遮挡鲁棒性
+        <b style="margin-top:6px;">规模</b>
+        ≥80 小时，夜间占一半
+      </div>
+      <div class="dc-foot"><b>感知层训练前必须到位</b></div>
+    </div>
+
+    <div class="data-card de">
+      <div class="dc-head">E 类 · 回溯测试集</div>
+      <div class="dc-body">
+        <b>解决什么</b>
+        最终验收、演示、需求方确认
+        <b style="margin-top:6px;">规模</b>
+        每类 ≥20 段，历史录像 + 演练
+      </div>
+      <div class="dc-foot"><b>最后成型，验收依据</b></div>
+    </div>
+  </div>
+
+  <!-- A类 -->
+  <div class="plan-block plan-card-a">
+    <div class="plan-head">
+      <span class="pno">A</span>
+      <div class="ptitle">正常基线数据 <small>量最大，最早启动，持续最久</small></div>
+      <span class="pbadge">辨偏离的唯一输入</span>
+    </div>
+    <div class="plan-body">
+      <div class="plan-grid">
+        <div class="k">采集方式</div>
+        <div class="v">8 路摄像头<b>连续采集</b>，覆盖完整作息周期（早市、午间、晚市、夜间），不抽样。</div>
+        <div class="k">规模</div>
+        <div class="v"><b>连续 3—4 周</b>，每路每天至少 4 个时段，累计约 <b>150—200 小时</b>。</div>
+        <div class="k">标注强度</div>
+        <div class="v"><b>轻标注</b>：只标区域多边形、时段划分，不需要逐条轨迹打标签；轨迹由算法自动生成，人工抽检 10% 校验。</div>
+        <div class="k">采集时机</div>
+        <div class="v">项目启动后<b>第一批启动</b>，持续到理解层建成。它是“辨偏离”唯一输入，也是记忆基座的第一批数据。</div>
+        <div class="k">责任方</div>
+        <div class="v">项目方主导采集；需求方提供场地、时段权限和存储空间。</div>
+        <div class="k">关键约束</div>
+        <div class="v">必须<b>连续</b>而非抽样——夜间游荡、清晨聚集、周末人流变化，只有连续覆盖才能形成可信的基线分布。</div>
+      </div>
+
+      <div class="ref-box">
+        <div class="ref-title">可参考的公开数据集 · 仅用于验证流程和算法骨架</div>
+        <div class="ref-item"><b>MOT17 / MOT20</b>：行人多目标跟踪基准，用于验证你的检测+跟踪流水线能否稳定输出轨迹。MOT17 训练集 14 个序列、15948 帧、1638 个身份，场景相对规整，适合建立跟踪基线。</div>
+        <div class="ref-item"><b>CrowdHuman</b>：约 15 万张密集人群图像，用于检测器的遮挡鲁棒性预训练。它不能替代你的正常基线，但能让检测器在“人被货架挡住一半”时召回更稳。</div>
+        <div class="ref-item"><b>DanceTrack</b>：外观相似、频繁遮挡、非线性运动，与“购物/穿行/折返交替”的关联困难高度同构。用它测试跟踪器，可以预判你的轨迹在真实场景中的断裂风险。</div>
+        <div class="ref-item"><b>边界：</b>公开数据集的“正常”不是你的“正常”。它们只用于验证感知层能跑、跟踪器选型合理，<b>不能写入记忆基座</b>。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B类 -->
+  <div class="plan-block plan-card-b">
+    <div class="plan-head">
+      <span class="pno">B</span>
+      <div class="ptitle">正例 / 苗头样本 <small>稀缺，靠三条路补</small></div>
+      <span class="pbadge">规则阈值校准</span>
+    </div>
+    <div class="plan-body">
+      <div class="plan-grid">
+        <div class="k">采集方式</div>
+        <div class="v">三条路并行：<b>历史录像回溯</b>（从处置记录/报警记录反查对应时间段录像）、<b>受控现场演练</b>（非营业时段模拟倒地、逗留、折返、聚集）、<b>公开数据集补位</b>（只补方法论，不补场景）。</div>
+        <div class="k">规模</div>
+        <div class="v">每类目标 <b>几十条</b>即可——规则阈值只需要少量正例校准，不需要几千条训练。<b>不追求统计显著的召回率评估</b>。</div>
+        <div class="k">标注强度</div>
+        <div class="v"><b>强标注</b>：逐段标注事件类型、起止时间、涉及轨迹、触发所依据的轨迹字段（如“停留 8min + 路径效率 0.21 + 主通道”）。</div>
+        <div class="k">采集时机</div>
+        <div class="v">项目启动后<b>尽早启动</b>，因为历史录像调取和现场演练组织都需要需求方协调，周期长。<b>如果需求方不愿意组织演练，正例只能靠历史回溯和公开数据，验收口径要相应放宽。</b></div>
+        <div class="k">责任方</div>
+        <div class="v">需求方提供历史录像和演练组织；项目方负责筛选和标注。</div>
+        <div class="k">关键约束</div>
+        <div class="v">正例稀缺不会让项目做不了——<b>规则和基线都不靠正例训练</b>，正例只用于调阈值和定性验证。但必须提前和需求方对齐“演练能否组织”。</div>
+      </div>
+
+      <div class="ref-box">
+        <div class="ref-title">可参考的公开数据集 · 方法论参照与演练环境</div>
+        <div class="ref-item"><b>Loitering Dataset（WACV 2024）</b>：与“徘徊”最直接相关的公开标注数据集。将徘徊判据参数化为<b>移动方向性、步速、停留时间</b>，覆盖晴、雨、雪、雾多种条件，标注 31 天、约 1.97 万个 ID，其中 80.44% 为非徘徊。代码和标注在 <code>github.com/johnnynunez/RS-WACV24_Loitering</code>。<b>演练用法</b>：用它的轨迹标注验证你的“路径效率+方向反转”规则能否区分徘徊/非徘徊，作为阈值校准起点。</div>
+        <div class="ref-item"><b>CASIA 行为分析数据库</b>：中文行为数据集，明确包含“徘徊”类别（“一人来来回绕车走几次”）。分辨率较低（320×240），需签协议申请，但提供了<b>可见光域</b>下的徘徊样本，可以直观观察徘徊在画面中的视觉表现。</div>
+        <div class="ref-item"><b>ShanghaiTech / UCF-Crime</b>：视频异常检测经典 benchmark，用于验证“正常建模 + 异常评分”这条技术路线是否跑得通。它们的异常类别较粗（暴力、破坏、事故），<b>不能直接迁移到你的细粒度行为</b>，但可以证明方法可行。</div>
+        <div class="ref-item"><b>PAB（ICCV 2025）</b>：百万级合成异常行为图像 + 1978 张真实测试图，覆盖躺卧、摔倒等关键姿态。可用于“蹲 vs 倒”的困难区分参考，但合成图像的域与真实公共空间差异大，<b>只能作为辅助训练信号</b>。</div>
+        <div class="ref-item"><b>YOLO 异常行为数据集</b>：包含 9100 张 YOLO 格式标注图像，定义了 5 类行为（non_pedestrian、reverse、sit、sleep、stand）。其中的 <code>sit</code> 和 <code>sleep</code> 类别，可以为你区分“正常蹲坐”与“异常倒地/躺卧”提供标注视角的参考。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C类 -->
+  <div class="plan-block plan-card-c">
+    <div class="plan-head">
+      <span class="pno">C</span>
+      <div class="ptitle">困难负样本 <small>决定系统上线后能不能用</small></div>
+      <span class="pbadge">误报压测</span>
+    </div>
+    <div class="plan-body">
+      <div class="plan-grid">
+        <div class="k">采集方式</div>
+        <div class="v">从 A 类正常数据中<b>定向筛选</b>——不需要额外采集，但需要人工过一遍。典型片段：蹲下取物、弯腰搬运、推车临时停放、正常交易聚集、出入口等人、摊位前长时间议价、货物临时堆放。</div>
+        <div class="k">规模</div>
+        <div class="v">每类 <b>≥200 段</b>，每段 15 秒—3 分钟。</div>
+        <div class="k">标注强度</div>
+        <div class="v"><b>中等标注</b>：标注片段起止时间、所属类别、区域。</div>
+        <div class="k">采集时机</div>
+        <div class="v">A 类数据积累到 2 周左右即可开始筛选，<b>必须在试运行前完成压测</b>——不专门采集，系统上线第一天就会被误报淹掉。</div>
+        <div class="k">责任方</div>
+        <div class="v">项目方主导筛选和标注；需求方可以参与确认“哪些是正常行为”。</div>
+        <div class="k">关键约束</div>
+        <div class="v">这是 A 类标注之外<b>唯一需要额外人工投入</b>的环节，但也是决定系统可用性的关键。</div>
+      </div>
+
+      <div class="ref-box">
+        <div class="ref-title">可参考的公开数据集 · 边界定义与负样本思路</div>
+        <div class="ref-item"><b>Loitering Dataset</b>：它明确区分了徘徊与非徘徊（80.44% 为非徘徊），这为你定义“正常交易停留”与“异常徘徊”的边界提供了负样本比例和参数化思路的参考。</div>
+        <div class="ref-item"><b>YOLO 异常行为数据集</b>：其中的 <code>sit</code>、<code>stand</code> 类别可以作为“蹲坐/站立”正常姿态的参照，帮助你校准“正常蹲取”与“异常倒地”的边界。</div>
+        <div class="ref-item"><b>边界：</b>公开数据集没有你场景的“摊位区正常交易”“货架后正常取货”这类负样本，<b>困难负样本必须从你的真实数据中筛</b>，公开数据只能参考标注视角。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D类 -->
+  <div class="plan-block plan-card-d">
+    <div class="plan-head">
+      <span class="pno">D</span>
+      <div class="ptitle">退化条件数据 <small>低照度、遮挡、逆光、沙尘</small></div>
+      <span class="pbadge">质量门控</span>
+    </div>
+    <div class="plan-body">
+      <div class="plan-grid">
+        <div class="k">采集方式</div>
+        <div class="v">从 A 类中筛选 + <b>针对性补采</b>：夜间低照度、沙尘天气、出入口逆光、雨雪后地面反光、货架/推车重度遮挡。<b>沙尘天气不可控，需提前部署持续录制，事后筛选。</b></div>
+        <div class="k">规模</div>
+        <div class="v"><b>≥80 小时</b>，其中夜间至少占一半。</div>
+        <div class="k">标注强度</div>
+        <div class="v"><b>弱标注</b>：只需标注退化类型和严重程度，不需要轨迹标注。</div>
+        <div class="k">采集时机</div>
+        <div class="v">与 A 类同步启动，<b>感知层训练前必须到位</b>——质量门控的轻量分类器需要它来训练“这帧可不可信”。</div>
+        <div class="k">责任方</div>
+        <div class="v">项目方主导；需求方提供沙尘天气的持续录制条件。</div>
+        <div class="k">关键约束</div>
+        <div class="v">夜间、沙尘、逆光是<b>必须面对的真实条件</b>，不能假设所有帧都“干净”。质量门控不是可选项。</div>
+      </div>
+
+      <div class="ref-box">
+        <div class="ref-title">可参考的公开数据集 · 退化条件与域适应参考</div>
+        <div class="ref-item"><b>Loitering Dataset</b>：覆盖晴、雨、雪、雾多种环境条件，虽然它是热成像域，但其<b>退化条件下的轨迹标注方法论</b>可以借鉴——如何在低质量条件下仍然保持轨迹语义的可比性。</div>
+        <div class="ref-item"><b>LLVIP</b>：低照度可见光-红外配准数据集，可用于训练<b>质量评估/退化分类器</b>，让系统知道“这帧质量下降了，证据可信度要打折”。你的摄像头是可见光，重点不是红外融合，而是退化识别。</div>
+        <div class="ref-item"><b>边界：</b>退化条件的核心是<b>标记哪些帧不可信</b>，而不是“修复”图像。生成式增强带来的伪影可能比退化本身更危险。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E类 -->
+  <div class="plan-block plan-card-e">
+    <div class="plan-head">
+      <span class="pno">E</span>
+      <div class="ptitle">回溯测试集 <small>验收依据，最后成型</small></div>
+      <span class="pbadge">验收与演示</span>
+    </div>
+    <div class="plan-body">
+      <div class="plan-grid">
+        <div class="k">采集方式</div>
+        <div class="v">从<b>历史录像</b>和<b>现场演练片段</b>中挑选，包含真实事件或可控模拟事件。</div>
+        <div class="k">规模</div>
+        <div class="v">每类事件 <b>≥20 段</b>。这个数量只够做定性验证和演示，<b>不够做统计显著的定量评估</b>——这一点要提前和需求方说明。</div>
+        <div class="k">标注强度</div>
+        <div class="v"><b>强标注</b>：逐段标注事件类型、起止时间、涉及轨迹、触发依据。</div>
+        <div class="k">采集时机</div>
+        <div class="v"><b>最后成型</b>，但历史录像的调取要尽早启动——它和 B 类正例共用同一批历史素材。</div>
+        <div class="k">责任方</div>
+        <div class="v">双方共同确认：需求方提供历史素材和演练记录，项目方整理和标注。</div>
+        <div class="k">关键约束</div>
+        <div class="v">这是<b>唯一能验证“系统在真实场景中能不能用”的数据</b>，不能用公开数据集替代。</div>
+      </div>
+
+      <div class="ref-box">
+        <div class="ref-title">可参考的公开数据集 · 仅用于对比实验和方法验证</div>
+        <div class="ref-item"><b>ShanghaiTech / UCF-Crime</b>：可以作为“你的系统”与“公开 VAD 方法”的对比实验，证明你的路线在公开数据上可行，但<b>不作为你的验收依据</b>。</div>
+        <div class="ref-item"><b>Loitering Dataset</b>：可以作为徘徊检测的对照 benchmark，报告你的方法在该数据集上的表现，但<b>你的验收仍然以自建 E 类回溯测试集为准</b>。</div>
+        <div class="ref-item"><b>边界：</b>E 类回溯测试集必须来自你的真实场景或演练，公开数据集只能用于“证明方法可行”，不能用于“证明系统在你的场景可用”。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 数据需求矩阵 -->
+  <h3 class="sub">数据需求矩阵：每类数据在两条路径中的角色</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:18%">数据类别</th>
+          <th style="width:20%">主要用途</th>
+          <th style="width:20%" style="background:#f0f9ff; color:#0284c7;">路径 A · 快速出效果</th>
+          <th style="width:20%" style="background:#f5f3ff; color:#7e3af2;">路径 B · 从零搭建</th>
+          <th>关键判断</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>A 类 · 正常基线</b></td>
+          <td>建分层正常分布，记忆基座第一批数据</td>
+          <td><span class="role-cal">校准用</span> 每区域 2—3 天</td>
+          <td><span class="role-main">骨架</span> 连续 3—4 周</td>
+          <td>路径 A 用量小但必须有；路径 B 是核心输入</td>
+        </tr>
+        <tr>
+          <td><b>B 类 · 正例/苗头</b></td>
+          <td>阈值校准、演示</td>
+          <td><span class="role-aux">辅助</span> 几十条即可</td>
+          <td><span class="role-aux">辅助</span> 几十条即可</td>
+          <td>两条路径都不需要大量正例，规则和基线不靠正例训练</td>
+        </tr>
+        <tr>
+          <td><b>C 类 · 困难负样本</b></td>
+          <td>压误报</td>
+          <td><span class="role-main">必需</span> 从真实数据人工筛</td>
+          <td><span class="role-main">必需</span> 从真实数据人工筛</td>
+          <td>决定系统能不能用，两条路径都绕不开</td>
+        </tr>
+        <tr>
+          <td><b>D 类 · 退化条件</b></td>
+          <td>质量门控、鲁棒性</td>
+          <td><span class="role-aux">辅助</span> 平台预置可覆盖部分</td>
+          <td><span class="role-main">必需</span> 感知层核心</td>
+          <td>通用退化条件，路径 B 必须自采</td>
+        </tr>
+        <tr>
+          <td><b>E 类 · 回溯测试集</b></td>
+          <td>验收、演示</td>
+          <td><span class="role-aux">演示用</span> 可选</td>
+          <td><span class="role-main">必需</span> 验收依据</td>
+          <td>路径 A 不作为硬验收；路径 B 是交付前提</td>
+        </tr>
+        <tr>
+          <td><b>公开数据集</b></td>
+          <td>骨干预训练、方法论参照</td>
+          <td><span class="role-main">主角</span> 先用它跑通</td>
+          <td><span class="role-aux">参照</span> 只做骨干和方法论</td>
+          <td>路径 A 当主角，路径 B 只做参照——这是两条路径最根本的区别</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="transition">
+    <b>本章讲清了五类数据各自解决什么问题、怎么采、参考哪些公开数据集。</b>第一步跑通之后，系统往哪走？下一章讲三步演进——从视频单模态，到多模态物理传感，再到多源社会数据融合。
+    <span class="next">→ 下一章：往哪走——三步演进路线</span>
+  </div>
+
+  <!-- ============ 五、往哪走 ============ -->
+  <h2 class="section" id="s5"><span class="idx">五、</span>往哪走：三步演进路线<span class="lead">视频单模态 → 多模态物理传感 → 多源社会数据融合</span></h2>
+
+  <div class="scope-warning">
+    <b>范围声明：本章描述的是演进方向，不是本期交付承诺。</b>
+    本期交付范围是<b>第一步视频单模态</b>。第二步和第三步是后续规划，它们的启动时机、投入规模、合规审批都需要在第一步跑通后另行决策。列出它们的目的不是承诺功能，而是<b>说明技术路线的完整性</b>——确保第一步的架构设计不会把后续演进的路堵死。
+  </div>
+
+  <figure>
+    <span class="fig-tag">图 5 · 三步演进：从单模态到社会关系</span>
+    <svg viewBox="0 0 1000 320" role="img" aria-label="三步演进路线：视频单模态、多模态物理传感、多源社会数据融合">
+      <defs>
+        <marker id="evo-arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+          <path d="M0,0 L10,4 L0,8 z" fill="#94a3b8"/>
+        </marker>
+      </defs>
+      <rect x="0" y="0" width="1000" height="320" fill="#fff"/>
+
+      <rect x="30" y="60" width="280" height="190" rx="12" fill="#ecfdf5" stroke="#0e9f6e" stroke-width="2"/>
+      <text x="170" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#0e9f6e" letter-spacing="1">第一步 · 当前</text>
+      <text x="170" y="112" text-anchor="middle" font-size="16" font-weight="700" fill="#0e9f6e">视频单模态</text>
+      <line x1="60" y1="126" x2="280" y2="126" stroke="#a7f3d0" stroke-width="1"/>
+      <text x="60" y="148" font-size="11.5" fill="#374151">· 跑通三层处理 + 记忆基座</text>
+      <text x="60" y="168" font-size="11.5" fill="#374151">· 摄像头是唯一输入</text>
+      <text x="60" y="188" font-size="11.5" fill="#374151">· 记忆基座 = 轨迹库</text>
+      <text x="60" y="208" font-size="11.5" fill="#374151">· 识形态 / 辨偏离 / 释归因</text>
+      <text x="60" y="232" font-size="11" fill="#059669" font-weight="600">本期交付</text>
+
+      <line x1="310" y1="155" x2="345" y2="155" stroke="#94a3b8" stroke-width="2" marker-end="url(#evo-arr)"/>
+
+      <rect x="350" y="60" width="280" height="190" rx="12" fill="#fffbeb" stroke="#b45309" stroke-width="2"/>
+      <text x="490" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#b45309" letter-spacing="1">第二步</text>
+      <text x="490" y="112" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">多模态物理传感</text>
+      <line x1="380" y1="126" x2="600" y2="126" stroke="#fde68a" stroke-width="1"/>
+      <text x="380" y="148" font-size="11.5" fill="#374151">· 红外热成像 + 音频 + 毫米波雷达</text>
+      <text x="380" y="168" font-size="11.5" fill="#374151">· 补夜间、逆光、视野外、遮挡</text>
+      <text x="380" y="188" font-size="11.5" fill="#374151">· 记忆基座 = 多模态时空证据库</text>
+      <text x="380" y="208" font-size="11.5" fill="#374151">· 多证据融合判断“倒地”等状态</text>
+      <text x="380" y="232" font-size="11" fill="#b45309" font-weight="600">后续规划 · 不承诺</text>
+
+      <line x1="630" y1="155" x2="665" y2="155" stroke="#94a3b8" stroke-width="2" marker-end="url(#evo-arr)"/>
+
+      <rect x="670" y="60" width="280" height="190" rx="12" fill="#f5f3ff" stroke="#6d28d9" stroke-width="2"/>
+      <text x="810" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#6d28d9" letter-spacing="1">第三步</text>
+      <text x="810" y="112" text-anchor="middle" font-size="16" font-weight="700" fill="#6d28d9">多源社会数据融合</text>
+      <line x1="700" y1="126" x2="920" y2="126" stroke="#c4b5fd" stroke-width="1"/>
+      <text x="700" y="148" font-size="11.5" fill="#374151">· 社交网络 + 通信 + 业务记录</text>
+      <text x="700" y="168" font-size="11.5" fill="#374151">· 补“看不见的关系”</text>
+      <text x="700" y="188" font-size="11.5" fill="#374151">· 记忆基座 = 多模态实体关系库</text>
+      <text x="700" y="208" font-size="11.5" fill="#374151">· 个体告警 → 群体风险预警</text>
+      <text x="700" y="232" font-size="11" fill="#6d28d9" font-weight="600">远期方向 · 合规前置</text>
+
+      <text x="500" y="290" text-anchor="middle" font-size="11" fill="#9ca3af">每一步都是对现有架构的增强，不改变三层处理的基本逻辑；但数据敏感度和合规复杂度逐级上升</text>
+    </svg>
+    <figcaption><b>三步演进</b>：第一步视频单模态是本期交付；第二步用物理传感器补盲，第三步用社会数据补关系。每一步都不改变三层处理的基本逻辑，但记忆基座的组织形态逐级扩展，合规复杂度逐级上升。</figcaption>
+  </figure>
+
+  <!-- 第一步 -->
+  <div class="evo-block evo-card-1">
+    <div class="evo-head">
+      <div class="evo-badge">第一步<small>当前</small></div>
+      <div class="evo-title">视频单模态<small>把“建线 → 读线 → 用线”跑通</small></div>
+      <div class="evo-tag">本期交付</div>
+    </div>
+    <div class="evo-body">
+      <p>用第三章的路径 A 或路径 B，以摄像头视频为唯一输入，完成感知建线、理解读线、决策用线，记忆基座存住轨迹。<b>这是所有后续演进的地基</b>——如果第一步的轨迹不稳、语义不准，加再多传感器和数据都没有意义。</p>
+      <div class="impacts">
+        <div class="impact i-per"><b>感知</b>视频检测 + 单镜跟踪 + 跨镜关联；验收：稳</div>
+        <div class="impact i-und"><b>理解</b>识形态 + 辨偏离 + 释归因；验收：准</div>
+        <div class="impact i-act"><b>决策</b>处置告警 + 关注线索 + 共现图；验收：快</div>
+      </div>
+      <div class="mem-extend"><b>记忆基座：</b>轨迹库——存带 ID 的时空曲线、外观向量、区域序列、标签、质量分。四类索引：时间、空间、向量、ID。</div>
+    </div>
+  </div>
+
+  <!-- 第二步 -->
+  <div class="evo-block evo-card-2">
+    <div class="evo-head">
+      <div class="evo-badge">第二步<small>后续</small></div>
+      <div class="evo-title">多模态物理传感<small>用物理传感器补摄像头的盲区</small></div>
+      <div class="evo-tag">后续规划 · 不承诺</div>
+    </div>
+    <div class="evo-body">
+      <p>引入<b>红外热成像、音频、毫米波雷达</b>三类传感器，解决摄像头结构性缺失的问题。这一步的核心不是“多装几个设备”，而是<b>为感知层补上摄像头看不见的那几条线，并让理解层获得摄像头无法提供的物理证据</b>。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:16%">传感器</th>
+              <th style="width:30%">解决什么问题</th>
+              <th style="width:28%">在系统中的落点</th>
+              <th>边界</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>红外热成像</b></td>
+              <td>完全黑暗、强逆光、轻雾条件下仍能输出人体轮廓；不记录面部纹理，隐私友好</td>
+              <td>补感知层的夜间和逆光轨迹；为“倒地”提供姿态持续性和体温分布的物理证据</td>
+              <td>空间分辨率低于可见光，不适合精细外观检索；对环境热源敏感，需校准</td>
+            </tr>
+            <tr>
+              <td><b>音频（麦克风阵列）</b></td>
+              <td>360°覆盖，在视觉确认之前捕获呼救、尖叫、玻璃破碎、剧烈撞击、人群骚动</td>
+              <td>作为触发级调度的前置信号——异常声音触发关注，摄像头转向或调取对应区域</td>
+              <td>嘈杂公共空间中误报率上升；持续采集有隐私负担，需严格限定“监听什么”</td>
+            </tr>
+            <tr>
+              <td><b>毫米波雷达</b></td>
+              <td>穿透非金属障碍物，在完全黑暗和视线被完全遮挡时仍能探测人体存在、距离、速度和朝向</td>
+              <td>补感知层遮挡和非视距下的“是否存在”；为“盲区停留”提供决定性证据</td>
+              <td>空间分辨率远不及摄像头，无法做外观检索；点云语义解释依赖模型，标定迁移成本不低</td>
+            </tr>
+            <tr>
+              <td style="color:var(--mid);">超声传感器</td>
+              <td style="color:var(--mid);">近距离存在检测</td>
+              <td style="color:var(--mid);">不建议纳入——易被衣物吸收、多径散射严重、更新率低</td>
+              <td style="color:var(--mid);">更适合狭窄通道存在检测，不适合作为感知层主传感器</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="impacts">
+        <div class="impact i-per"><b>感知</b>夜间/逆光/遮挡下轨迹不丢；轨迹增加“证据来源”维度</div>
+        <div class="impact i-und"><b>理解</b>“倒地”从单帧姿态升级为“姿态持续性 + 无主动恢复 + 无呼救声”的多证据事件</div>
+        <div class="impact i-act"><b>决策</b>音频触发关注、摄像头转向确认、雷达核实盲区——从“看到才报”到“先听后看”</div>
+      </div>
+
+      <div class="mem-extend"><b>记忆基座扩展：</b>从“轨迹库”扩展为<b>“多模态时空证据库”</b>——在某个时空位置，有哪些传感器观测到了什么，各自置信度多少。轨迹的“线”可以由可见光框连成，也可以由热斑或雷达点云连成；理解层读取的是<b>这些证据的并集</b>，而不是某一种模态的序列。</div>
+
+      <div class="boundary"><b>边界与建议：</b>热成像分辨率低，不做外观检索；音频在嘈杂环境误报率上升，且持续采集有隐私负担；雷达点云语义解释依赖模型，标定迁移成本不低。<b>建议以“感知层补盲”为第二步首要目标，理解层的多证据融合作为第二步后期目标，决策层的协同调度作为远期方向。</b></div>
+    </div>
+  </div>
+
+  <!-- 第三步 -->
+  <div class="evo-block evo-card-3">
+    <div class="evo-head">
+      <div class="evo-badge">第三步<small>远期</small></div>
+      <div class="evo-title">多源社会数据融合<small>从“个体观察者”升级为“关系解读者”</small></div>
+      <div class="evo-tag">远期方向 · 合规前置</div>
+    </div>
+    <div class="evo-body">
+      <p>引入<b>社交网络、通信记录、业务与行政数据</b>，把视频的“共现网络”升级为“社会关系网络”。核心跨越在于<b>为匿名轨迹 ID 注入“关系”与“身份”的语义</b>——从“谁和谁经常一起出现”走向“谁和谁是什么关系、这个群体是否在协同行动”。</p>
+
+      <p>欧盟两个项目为这条路径提供了参照：<b>MOSAIC</b> 证明在视频之外引入文本和结构化记录后，社交网络分析可以作为理解层的正式组件；<b>PREVISION</b> 展示了多源大数据流经语义整合构建动态知识图谱、并用于预测的完整链条。</p>
+
+      <h4 class="mini">需要引入的数据维度</h4>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:18%">数据维度</th>
+              <th style="width:32%">具体数据</th>
+              <th>在关系分析中的作用</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>身份关联</b></td>
+              <td>社交账号、设备特征码、实名信息、生物特征（合规前提下）</td>
+              <td>把匿名轨迹映射到真实实体，是连接线上行为与线下轨迹的桥梁</td>
+            </tr>
+            <tr>
+              <td><b>通信与社交互动</b></td>
+              <td>通话详单、短信、社交好友与互动、资金往来、共同网络</td>
+              <td>直接定义人与人之间的连接，是社交网络分析的核心数据</td>
+            </tr>
+            <tr>
+              <td><b>时空行为补充</b></td>
+              <td>交通出行、位置轨迹、消费行为</td>
+              <td>补充视频盲区的移动轨迹，反映生活轨迹和消费习惯</td>
+            </tr>
+            <tr>
+              <td><b>业务与行政</b></td>
+              <td>亲属关系、职业与组织关系、案件与事件关联</td>
+              <td>为关系提供官方背书，直接关联到具体事件和人员</td>
+            </tr>
+            <tr>
+              <td><b>多模态内容</b></td>
+              <td>文本内容、图像与音视频</td>
+              <td>通过自然语言处理和场景识别，辅助判断活动性质和关联人员</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="impacts">
+        <div class="impact i-per"><b>感知</b>接入文本、通信记录等数据流，统一清洗、对齐、实体识别</div>
+        <div class="impact i-und"><b>理解</b>新增社交网络分析模块——社区发现、关键节点识别、链路预测、协同行动识别</div>
+        <div class="impact i-act"><b>决策</b>从“个体行为告警”扩展到“群体性风险预警”——识别潜在协同团伙、发现异常聚集的组织者</div>
+      </div>
+
+      <div class="mem-extend"><b>记忆基座扩展：</b>从“多模态时空证据库”进一步扩展为<b>“多模态实体关系库”</b>——存储的不再只是轨迹，而是人、账号、设备、地点、事件、组织等实体及其相互关系，形成<b>动态知识图谱</b>的底层数据。</div>
+
+      <div class="boundary"><b>边界与前置约束：</b>这一步涉及通信记录、社交关系等极高隐私敏感度的数据，<b>合规复杂度非线性上升</b>。必须建立数据分级授权、用途限定、匿名化与最小化、完整操作审计日志。<b>建议在顶层设计阶段就把隐私合规框架与数据治理体系作为核心组成部分同步规划，而不是事后附加。</b></div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <b>三步之间的关系：</b>不是“第一步做完再做第二步”，而是<b>第一步跑通后，第二步和第三步按需渐进</b>。第二步的传感器扩展主要增强感知层的“稳”，对理解层和决策层是渐进增强；第三步的数据融合则会显著改变记忆基座的组织形态和理解层的能力边界。<b>每一步都必须在合规框架内推进，尤其第三步——它的数据敏感度要求从设计阶段就把隐私保护作为核心约束，而不是事后补救。</b>
+  </div>
+
+  <h3 class="sub">演进对第一步架构设计的约束</h3>
+
+  <p style="font-size:14px; color:#374151; line-height:1.8; margin:0 0 6px;">
+    虽然第二步和第三步不是本期交付，但<b>第一步的架构设计不能把后续演进的路堵死</b>。以下三条约束需要在第三章的实施中落实：
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:20%">约束</th>
+          <th style="width:38%">具体要求</th>
+          <th>为什么</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>轨迹记录预留证据来源字段</b></td>
+          <td>每条轨迹记录增加“证据来源”字段（可见光/热成像/雷达/音频），当前只填“可见光”</td>
+          <td>第二步多模态扩展时不需要改表结构；记忆基座可以直接承接多模态证据</td>
+        </tr>
+        <tr>
+          <td><b>记忆基座预留实体关系扩展点</b></td>
+          <td>轨迹库的表结构预留“实体标识”和“关系类型”两个可空字段，当前不填充</td>
+          <td>第三步实体关系库扩展时可以在同一基座上演进，而不是另建一套存储</td>
+        </tr>
+        <tr>
+          <td><b>合规框架从设计阶段建立</b></td>
+          <td>第一步就明确数据分级、访问控制、操作审计日志的框架，即使当前只有视频数据</td>
+          <td>第三步引入高敏感数据时，框架已经存在，只需扩展授权范围；而不是从零建合规体系</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <b>这三条约束的成本很低</b>——预留字段、建立框架，在第一步的实施中几乎不增加工作量。但它们的价值很高：<b>让第一步的架构成为后续演进的起点，而不是需要推倒重来的终点。</b>
+  </div>
+
+  <div class="transition">
+    <b>本章讲清了往哪走——第一步视频单模态是本期交付，第二步多模态传感、第三步社会数据融合是后续方向。</b>那么每一步做得好不好，怎么衡量？下一章讲验收口径——正例稀缺的情况下，不能按常规指标验收。
+    <span class="next">→ 下一章：怎么验收——分层验收口径</span>
+  </div>
+
+  <!-- ============ 六、怎么验收 ============ -->
+  <h2 class="section" id="s6"><span class="idx">六、</span>怎么验收：分层验收口径<span class="lead">正例稀缺，不能按常规指标验收</span></h2>
+
+  <div class="thesis" style="margin:16px 0 24px;">
+    <span class="big">核心判断：不承诺“异常召回率 95%”，因为场景没有足够正例支撑这个承诺。</span>
+    承诺的是——<b>已知风险不漏、未知偏离能捞、捞出来能解释、误报量在运维可承受范围内</b>，并且每一项都有可核验的测试集。验收按能力层分层设计，每层有不同的验收方式和可承诺指标。
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:18%">能力层</th>
+          <th style="width:24%">验收方式</th>
+          <th style="width:32%">可承诺的指标</th>
+          <th>数据依赖</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>感知（稳）</b></td>
+          <td>正常数据上评估</td>
+          <td>跟踪 IDF1、遮挡后 ID 恢复率、轨迹完整率</td>
+          <td>不需要正例，A 类 + D 类即可</td>
+        </tr>
+        <tr>
+          <td><b>理解① 识形态（准）</b></td>
+          <td>B 类正例 + C 类困难负样本</td>
+          <td>正例上报告<b>检出率</b>（非召回率）；困难负样本上报告<b>误报率</b>，按区域分层</td>
+          <td>B 类几十条 + C 类每类 ≥200 段</td>
+        </tr>
+        <tr>
+          <td><b>理解② 辨偏离（捞得到）</b></td>
+          <td>E 类回溯测试集</td>
+          <td>已知事件落入偏离候选池的<b>覆盖率</b>；候选池<b>日均条数</b>（运维可承受性）</td>
+          <td>A 类正常基线 + E 类回溯测试集</td>
+        </tr>
+        <tr>
+          <td><b>理解③ 释归因（说得清）</b></td>
+          <td>人工评估</td>
+          <td>需求方人员判断“描述是否有帮助”的<b>有用率</b>，不做自动化指标</td>
+          <td>真实偏离候选 + 人工评估</td>
+        </tr>
+        <tr>
+          <td><b>决策（快）</b></td>
+          <td>端到端运行</td>
+          <td>告警延迟、线索密度、回溯检索响应时间</td>
+          <td>真实运行数据 + E 类回溯测试集</td>
+        </tr>
+        <tr>
+          <td><b>记忆基座（全）</b></td>
+          <td>支撑性评估</td>
+          <td>轨迹完整率、检索命中率、跨时段关联正确率</td>
+          <td>A 类正常基线 + 真实运行数据</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <b>为什么这样验收：</b>正例稀缺是场景的客观事实，不是技术能力不足。感知层不需要正例，可以正常评估；识形态的规则阈值只需要几十条正例校准，报告检出率而非召回率是诚实的；辨偏离本质上不依赖正例，它只学正常样本，用回溯测试集评估覆盖率是合理的；释归因是解释器不是判决器，人工评估有用率比自动化指标更贴近实际价值。
+  </div>
+
+  <div class="transition">
+    <b>本章讲清了怎么验收——分层验收，每层有不同的可承诺指标。</b>最后，还有十项需要需求方在项目启动阶段明确表态的事项。这些事项直接决定数据采集能否推进、验收口径怎么定。
+    <span class="next">→ 下一章：需要需求方拍板的事项</span>
+  </div>
+
+  <!-- ============ 七、拍板清单 ============ -->
+  <h2 class="section" id="s7"><span class="idx">七、</span>需要需求方拍板的事项<span class="lead">启动前确认清单</span></h2>
+
+  <p style="font-size:14px; color:#374151; line-height:1.8; margin:0 0 8px;">
+    以下事项需要需求方在项目启动阶段明确表态。它们直接决定数据采集能否推进、验收口径怎么定、正例稀缺的约束如何应对。<b>建议逐项确认后填入右栏，作为项目启动的输入。</b>
+  </p>
+
+  <div class="decision-block">
+    <div class="decision-head">
+      拍板清单 · 十项
+      <small>逐项确认，填写右栏意见</small>
+    </div>
+    <div class="decision-body">
+
+      <div class="decision-row">
+        <span class="dno">1</span>
+        <div class="ddesc"><b>优先覆盖哪几类可定义风险</b><small>从五类谱系中选 3—5 类作为一期范围</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+      <div class="decision-row">
+        <span class="dno">2</span>
+        <div class="ddesc"><b>未知偏离是否纳入一期</b><small>纳入（做候选池）/ 二期再做</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+      <div class="decision-row">
+        <span class="dno">3</span>
+        <div class="ddesc"><b>历史录像能否调取</b><small>能 / 部分能 / 不能；保存周期、调取权限、隐私审批</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+      <div class="decision-row">
+        <span class="dno">4</span>
+        <div class="ddesc"><b>能否组织现场演练</b><small>能（谁来组织、是否需报备）/ 不能</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+      <div class="decision-row">
+        <span class="dno">5</span>
+        <div class="ddesc"><b>正常数据采集的场地与时段权限</b><small>全天 / 限定时段 / 需报备</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+      <div class="decision-row">
+        <span class="dno">6</span>
+        <div class="ddesc"><b>标注人力由谁提供</b><small>需求方 / 项目方 / 外包</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+      <div class="decision-row">
+        <span class="dno">7</span>
+        <div class="ddesc"><b>合规审批由谁负责</b><small>需求方 / 项目方 / 共同</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+      <div class="decision-row">
+        <span class="dno">8</span>
+        <div class="ddesc"><b>验收口径是否接受分层验收</b><small>感知看稳、识形态看检出率、辨偏离看覆盖率、释归因看有用率</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+      <div class="decision-row">
+        <span class="dno">9</span>
+        <div class="ddesc"><b>一期交付形态</b><small>边缘设备 + 展示界面 / 仅算法 / 两者</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+      <div class="decision-row">
+        <span class="dno">10</span>
+        <div class="ddesc"><b>数据保存与脱敏要求</b><small>原始视频不出场站 / 允许回传片段 / 其他</small></div>
+        <div class="dblank">需求方意见：</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="closing">
+    这份文档回答了六个问题：<b>是什么、读什么、怎么建、用什么建、往哪走、怎么验收</b>。<br>
+    <b>是什么</b>——三层处理 + 一个基座：感知建线，理解读线，决策用线；记忆库存线，横贯底部。<br>
+    <b>读什么</b>——时空中的六种线：正常穿行、异常逗留、反复徘徊、倒地、共现、未知偏离。<br>
+    <b>怎么建</b>——两条路径：路径 A 公开数据先行快速出效果，路径 B 真实数据为骨架从零搭建。<br>
+    <b>用什么建</b>——五类数据：正常基线、正例、困难负样本、退化条件、回溯测试集。公开数据集只做参照，真实数据是骨架。<br>
+    <b>往哪走</b>——三步演进：视频单模态 → 多模态物理传感 → 多源社会数据融合。第一步是本期交付，后两步是后续方向。<br>
+    <b>怎么验收</b>——分层验收：感知看稳、识形态看检出率、辨偏离看覆盖率、释归因看有用率。<br>
+    <b>先跑通，再搭稳；公开数据验证需求，真实数据交付架构。</b>
+    <span class="sig">—— 三层处理，一个基座；三步演进，分层验收。</span>
+  </div>
+
+  <footer>完整方案 · 时空记忆智能体 · 用于团队对齐、需求确认、工程实施与执行排期</footer>
+
+</div>
+</body>
+</html>

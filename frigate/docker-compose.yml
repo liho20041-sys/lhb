@@ -1,0 +1,26 @@
+name: frigate-demo
+
+services:
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable-tensorrt
+    container_name: frigate
+    restart: unless-stopped
+    shm_size: "256mb"
+    ports:
+      - "5000:5000"
+      - "8554:8554"
+    environment:
+      TZ: Asia/Shanghai
+      NVIDIA_DRIVER_CAPABILITIES: all
+    volumes:
+      - ./config:/config
+      - ./media:/media
+    tmpfs:
+      - /tmp/cache:size=1000000000
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu, video]

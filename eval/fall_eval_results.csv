@@ -1,0 +1,11 @@
+pred,first_fall_t,max_fall_score,sampled,elapsed_s,file,gt_fall
+False,,1,15,1.38,adl-01-cam0.mp4,False
+False,,0,18,0.98,adl-02-cam0.mp4,False
+False,,0,18,1.04,adl-03-cam0.mp4,False
+False,,2,15,0.88,adl-04-cam0.mp4,False
+False,,2,18,1.0,adl-05-cam0.mp4,False
+False,,3,16,0.92,fall-01-cam0.mp4,True
+False,,3,11,0.64,fall-02-cam0.mp4,True
+False,,2,22,0.94,fall-03-cam0.mp4,True
+True,1.0,3,9,0.42,fall-04-cam0.mp4,True
+False,,3,16,0.74,fall-05-cam0.mp4,True

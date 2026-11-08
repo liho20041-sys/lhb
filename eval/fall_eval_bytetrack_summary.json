@@ -1,0 +1,68 @@
+{
+  "sample_fps": 5.0,
+  "descent_window": 1.0,
+  "min_angle_delta": 45.0,
+  "min_aspect_delta": 0.5,
+  "thresholds": {
+    "0.4": {
+      "tp": 28,
+      "fp": 11,
+      "tn": 29,
+      "fn": 2,
+      "precision": 0.7179,
+      "recall": 0.9333,
+      "f1": 0.8116,
+      "accuracy": 0.8143
+    },
+    "0.6": {
+      "tp": 27,
+      "fp": 8,
+      "tn": 32,
+      "fn": 3,
+      "precision": 0.7714,
+      "recall": 0.9,
+      "f1": 0.8308,
+      "accuracy": 0.8429
+    },
+    "0.8": {
+      "tp": 23,
+      "fp": 4,
+      "tn": 36,
+      "fn": 7,
+      "precision": 0.8519,
+      "recall": 0.7667,
+      "f1": 0.807,
+      "accuracy": 0.8429
+    },
+    "1.0": {
+      "tp": 14,
+      "fp": 3,
+      "tn": 37,
+      "fn": 16,
+      "precision": 0.8235,
+      "recall": 0.4667,
+      "f1": 0.5957,
+      "accuracy": 0.7286
+    },
+    "1.5": {
+      "tp": 6,
+      "fp": 2,
+      "tn": 38,
+      "fn": 24,
+      "precision": 0.75,
+      "recall": 0.2,
+      "f1": 0.3158,
+      "accuracy": 0.6286
+    },
+    "2.0": {
+      "tp": 3,
+      "fp": 1,
+      "tn": 39,
+      "fn": 27,
+      "precision": 0.75,
+      "recall": 0.1,
+      "f1": 0.1765,
+      "accuracy": 0.6
+    }
+  }
+}

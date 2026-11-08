@@ -1,0 +1,21 @@
+{
+  "model": "SSD",
+  "frigate_version": "0.18.2-cfa08c5",
+  "window_s": 120,
+  "detector_inference_ms": 15.06,
+  "camera_fps": 2.15,
+  "detection_fps": 5.47,
+  "total_events": 16,
+  "person_events": 16,
+  "labels": {
+    "person": 16
+  },
+  "person_score_mean": 0.83,
+  "person_score_p50": 0.8379,
+  "person_score_p90": 0.8438,
+  "person_score_min": 0.75,
+  "box_area_p50": 0.0868,
+  "small_objects(area<1%)": 0,
+  "large_objects(area>5%)": 14,
+  "box_area_max": 0.1427
+}
